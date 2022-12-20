@@ -25,9 +25,10 @@ int choose(int c,char a[][c]);
 void fill(int chip ,int r,int c,char a[][c],int q);
 void board(int r,int c,char a[][c]);
 void Menu(int r,int c,char a[][c]);
+int Random(int e,int c,char a[][c]);
 void Turns(int i,int r,int c,char a[][c]);
 void gameHuman(int r,int c,char a[][c]);
-void gameComputer(int r,int c,char a[][c]);
+void gameComputer(int w,int r,int c,char a[][c]);
 void Start(int r,int c,char a[][c]);
 void MainMenu(int r,int c,char a[][c],int x);
 //════════════════════════════════════════════════════════════════════════
@@ -72,7 +73,7 @@ void MainMenu(int r,int c,char a[][c],int x){
 }
 }
 void start(int r,int c,char a[][c]){
-    int q;
+    int q,w;
     system("cls");
     printf("Select GameMode:\n1:Player Vs Player\n2:Player Vs Computer\n");
     scanf("%d",&q);
@@ -82,12 +83,46 @@ void start(int r,int c,char a[][c]){
             gameHuman(r,c,a);
             break;
         case 2:
-            printf("gameComputer");
+            system("cls");
+            printf("(1):Player Starts\n(2):Computer Starts\n");
+            scanf("%d",&w);
+            gameComputer(w,r,c,a);
             break;
         default:
             start(r,c,a);}
 }
-void gameComputer(int r,int c,char a[][c]){
+void gameComputer(int w,int r,int c,char a[][c]){
+    int e=c/2;
+    board(r,c,a);
+    while(full(r,c,a)==0){
+        printf("(~):Menu\n\033[1;31mYour Score:%d\t\033[0;33mComputer Score:%d\n\033[1;31mYour Moves:%d\t\033[0;33mComputer Moves:%d\n",player1.score,player2.score,player1.turns,player2.turns);
+        if(w==1){
+            printf("\033[1;31mChoose A Bin:");
+            e=choose(c,a);
+                if(e==61){
+                        Menu(r,c,a);
+                        board(r,c,a);
+                        }
+                else{
+                fill(player1.chip,r,c,a,e);
+                blue();
+                board(r,c,a);
+                player1.score=countFours(player1.chip,r,c,a);
+                player1.turns++;
+                w=2;
+                }
+        }
+        if(w==2){
+                e=Random(e,c,a);
+                fill(player2.chip,r,c,a,e);
+                blue();
+                board(r,c,a);
+                player2.score=countFours(player2.chip,r,c,a);
+                player2.turns++;
+                w=1;
+        }
+
+    }
 }
 void gameHuman(int r,int c,char a[][c]){
     board(r,c,a);
@@ -229,6 +264,13 @@ void bar(int c){
         printf("%c%c",206,205);
     printf("\n");
 }
+int Random(int e,int c, char a[][c]){
+    srand(time(NULL));
+    e=rand()%10;
+    while(a[0][e]!=' '&&e<c)e++;
+    while(a[0][e]!=' '&&e>=0)e--;
+    return e;
+}
 void Menu(int r,int c,char a[][c]){
     char key;
     system("cls");
@@ -257,3 +299,4 @@ void Menu(int r,int c,char a[][c]){
         default:
             Menu(r,c,a);
 }}
+
