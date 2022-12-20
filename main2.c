@@ -95,8 +95,9 @@ void gameComputer(int w,int r,int c,char a[][c]){
     int e=c/2;
     board(r,c,a);
     while(full(r,c,a)==0){
-        printf("(~):Menu\n\033[1;31mYour Score:%d\t\033[0;33mComputer Score:%d\n\033[1;31mYour Moves:%d\t\033[0;33mComputer Moves:%d\n",player1.score,player2.score,player1.turns,player2.turns);
+        printf("\033[0m(~):Menu\n\033[1;31mYour Score:%d\t\033[0;33mComputer Score:%d\n\033[1;31mYour Moves:%d\t\033[0;33mComputer Moves:%d\n",player1.score,player2.score,player1.turns,player2.turns);
         if(w==1){
+            printf("\033[1;31mTime~%02d:%02d\n",(time(NULL)-tm.start)/60,(time(NULL)-tm.start)%60);
             printf("\033[1;31mChoose A Bin:");
             e=choose(c,a);
                 if(e==61){
