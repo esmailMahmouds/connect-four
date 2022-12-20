@@ -143,6 +143,24 @@ int countFours(char x,int r,int c,char a[][c]){
             if(f==4)count++;
         }
     }
+    for(i=0;i<r-3;i++){
+        for(j=0;j<c-3;j++){
+            f=0;
+            for(k=0;k<4;k++)
+                if(a[i+k][j+k]==x)
+                f++;
+            if(f==4)count++;
+        }
+    }
+    for(i=r-1;i>=3;i--){
+        for(j=c-1;j>=3;j--){
+            f=0;
+            for(k=0;k<4;k++)
+                if(a[i-k][j-k]==x)
+                f++;
+            if(f==4)count++;
+        }
+    }
     return count;
 }
 int Full(int r,int c,char a[][c]){
