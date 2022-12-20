@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <windows.h>
+#include <time.h>
 struct p{
     char name;
     int colour;
@@ -8,25 +9,29 @@ struct p{
     int score;
     char chip;
 }player1,player2;
+struct t{
+    long long start;
+}tm;
 
 void blue(){printf("\033[0;34m");}
 void red(){printf("\033[1;31m");}
 void yellow(){printf("\033[0;33m");}
 void reset(){printf("\033[0m");}
-void Menu(int r,int c,char a[][c]);
 void columnIndex(int c);
 void bar(int c);
 int countFours(char x,int r,int c,char a[][c]);
-int Full(int r,int c,char a[][c]);
+int full(int r,int c,char a[][c]);
 int choose(int c,char a[][c]);
 void fill(int chip ,int r,int c,char a[][c],int q);
 void board(int r,int c,char a[][c]);
+void Menu(int r,int c,char a[][c]);
 void Turns(int i,int r,int c,char a[][c]);
 void gameHuman(int r,int c,char a[][c]);
 void gameComputer(int r,int c,char a[][c]);
 void Start(int r,int c,char a[][c]);
 void MainMenu(int r,int c,char a[][c],int x);
 //════════════════════════════════════════════════════════════════════════
+
 int main(){
     int r=7,c=9,x=10;
     char a[r][c];
@@ -71,6 +76,7 @@ void start(int r,int c,char a[][c]){
     system("cls");
     printf("Select GameMode:\n1:Player Vs Player\n2:Player Vs Computer\n");
     scanf("%d",&q);
+    tm.start=time(NULL);
     switch(q){
         case 1:
             gameHuman(r,c,a);
@@ -92,7 +98,9 @@ void Turns(int i,int r,int c,char a[][c]){
     switch(i){
         case 1:
             red();
-            printf("(~):Menu\nPlayer 1 Score:%d\nPlayer 1 Moves:%d\nPlayer 1 Can Choose A Bin:",player1.score,player1.turns);
+            printf("(~):Menu\nPlayer 1 Score:%d\nPlayer 1 Moves:%d\n",player1.score,player1.turns);
+            printf("Time~%02d:%02d\n",(time(NULL)-tm.start)/60,(time(NULL)-tm.start)%60);
+            printf("Player 1 Can Choose A Bin:");
             e=choose(c,a);
             if(e==61){
                     Menu(r,c,a);
@@ -107,7 +115,9 @@ void Turns(int i,int r,int c,char a[][c]){
             break;
         case 2:
             yellow();
-            printf("(~):Menu\nPlayer 2 Score:%d\nPlayer 2 Moves:%d\nPlayer 2 Can Choose A Bin:",player2.score,player2.turns);
+            printf("(~):Menu\nPlayer 2 Score:%d\nPlayer 2 Moves:%d\n",player2.score,player2.turns);
+            printf("Time~%02d:%02d\n",(time(NULL)-tm.start)/60,(time(NULL)-tm.start)%60);
+            printf("Player 2 Can Choose A Bin:");
             e=choose(c,a);
             if(e==61){
                     Menu(r,c,a);
@@ -121,7 +131,7 @@ void Turns(int i,int r,int c,char a[][c]){
             i=1;}
             break;
     }
-    if(Full(r,c,a)==0)Turns(i,r,c,a);
+    if(full(r,c,a)==0)Turns(i,r,c,a);
 }
 int countFours(char x,int r,int c,char a[][c]){
     int count=0,f,i,j,k;
@@ -163,7 +173,7 @@ int countFours(char x,int r,int c,char a[][c]){
     }
     return count;
 }
-int Full(int r,int c,char a[][c]){
+int full(int r,int c,char a[][c]){
     for(int i=0;i<r;i++)
         for(int j=0;j<c;j++)
             if(a[i][j]==' ')
@@ -247,4 +257,3 @@ void Menu(int r,int c,char a[][c]){
         default:
             Menu(r,c,a);
 }}
-
