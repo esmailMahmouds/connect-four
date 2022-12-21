@@ -22,6 +22,7 @@ void reset(){printf("\033[0m");}
 void columnIndex(int c);
 void bar(int c);
 int countFours(char x,int r,int c,char a[][c]);
+void count(int r,int c,char a[][c]);
 int full(int r,int c,char a[][c]);
 void initiate(int r,int c,char a[][c]);
 int choose(int c,char a[][c]);
@@ -64,6 +65,9 @@ void MainMenu(int r,int c,char a[][c]){
         case'l':
             initiate(r,c,a);
             load(r,c,a);
+            count(r,c,a);
+            player1.score=countFours(player1.chip,r,c,a);
+            player2.score=countFours(player2.chip,r,c,a);
             if(b.g=='h')
                 gameHuman(r,c,a);
             if(b.g=='c')
@@ -298,7 +302,7 @@ void save(int r,int c,char a[][c]){
     system("cls");
     int key;
     FILE *s=NULL;
-    printf("choose slot:\n(1)slot1\n(2)slot2\n(3)slot3\n");
+    printf("Choose Slot:\n(1)slot1\n(2)slot2\n(3)slot3\n");
     scanf("%d",&key);
     switch(key){
         case 1:
@@ -325,7 +329,7 @@ void load(int r,int c,char a[][c]){
     system("cls");
     int key;
     FILE *s=NULL;
-    printf("choose slot:\n(1)slot1\n(2)slot2\n(3)slot3\n");
+    printf("Choose A Valid Slot:\n(1)slot1\n(2)slot2\n(3)slot3\n");
     scanf("%d",&key);
     switch(key){
         case 1:
@@ -377,4 +381,4 @@ void Menu(int r,int c,char a[][c]){
         default:
             Menu(r,c,a);
 }}
-
+void count(int r,int c,char a[][c]){
