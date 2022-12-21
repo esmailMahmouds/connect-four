@@ -225,9 +225,9 @@ void fill(int chip ,int r,int c,char a[][c],int q){
                        }
 }
 int choose(int c,char a[][c]){
-    char i;
-    scanf(" %c",&i);
-    i=i-65;
+    char i,I[1];
+    scanf(" %s",&I);
+    i=I[0]-65;
     if((a[0][i]==' ')&&(i<c)&&(i>=0)||(i==61))
         return i;
     else
