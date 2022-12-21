@@ -33,7 +33,7 @@ int Random(int e,int c,char a[][c]);
 void Turns(int i,int r,int c,char a[][c]);
 void gameHuman(int r,int c,char a[][c]);
 void gameComputer(int r,int c,char a[][c]);
-void Start(int r,int c,char a[][c]);
+void start(int r,int c,char a[][c]);
 void MainMenu(int r,int c,char a[][c]);
 void save(int r,int c,char a[][c]);
 void load(int r,int c,char a[][c]);
@@ -86,7 +86,7 @@ void MainMenu(int r,int c,char a[][c]){
 }
 }
 void start(int r,int c,char a[][c]){
-    int q,w;
+    int q;
     system("cls");
     printf("Select GameMode:\n1:Player Vs Player\n2:Player Vs Computer\n");
     scanf("%d",&q);//Scan integers only
@@ -255,9 +255,9 @@ int choose(int c,char a[][c]){
     i=I[0]-65;
     if((a[0][i]==' ')&&(i<c)&&(i>=0)||(i==61))
         return i;
-    else
-        printf("InValid Cloumn!\n");
-        choose(c,a);
+        else
+            printf("InValid Cloumn!\n");
+            choose(c,a);
 }
 void columnIndex(int c){
     printf(" ");
@@ -302,7 +302,7 @@ void save(int r,int c,char a[][c]){
     system("cls");
     int key;
     FILE *s=NULL;
-    printf("Choose Slot:\n(1)slot1\n(2)slot2\n(3)slot3\n");
+    printf("choose slot:\n(1)slot1\n(2)slot2\n(3)slot3\n");
     scanf("%d",&key);
     switch(key){
         case 1:
@@ -329,7 +329,7 @@ void load(int r,int c,char a[][c]){
     system("cls");
     int key;
     FILE *s=NULL;
-    printf("Choose A Valid Slot:\n(1)slot1\n(2)slot2\n(3)slot3\n");
+    printf("choose slot:\n(1)slot1\n(2)slot2\n(3)slot3\n");
     scanf("%d",&key);
     switch(key){
         case 1:
@@ -382,3 +382,13 @@ void Menu(int r,int c,char a[][c]){
             Menu(r,c,a);
 }}
 void count(int r,int c,char a[][c]){
+    int c1,c2;
+    for(int i=0;i<r;i++)
+        for(int j=0;j<c;j++){
+                if(a[i][j]=='X')c1++;
+                else if(a[i][j]=='O')c2++;
+        }
+    player1.turns=c1;
+    player2.turns=c2;
+}
+
