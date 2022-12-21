@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <windows.h>
 #include <time.h>
+#include <conio.h>
 struct q{
     char g;
     }b;
@@ -30,7 +31,7 @@ void fill(int chip ,int r,int c,char a[][c],int q);
 void board(int r,int c,char a[][c]);
 void Menu(int r,int c,char a[][c]);
 int Random(int e,int c,char a[][c]);
-void Turns(int i,int r,int c,char a[][c]);
+void Turns(int turn,int r,int c,char a[][c]);
 void gameHuman(int r,int c,char a[][c]);
 void gameComputer(int r,int c,char a[][c]);
 void start(int r,int c,char a[][c]);
@@ -40,7 +41,7 @@ void load(int r,int c,char a[][c]);
 //════════════════════════════════════════════════════════════════════════
 
 int main(){
-    int r=10,c=57,x=10;
+    int r=7,c=14,x=10;
     char a[r][c];
     player1.colour=1;player1.chip='X';player1.turns=0;player1.score=0;
     player2.colour=2;player2.chip='O';player2.turns=0;player2.score=0;
@@ -51,11 +52,10 @@ int main(){
 //════════════════════════════════════════════════════════════════════════
 
 void MainMenu(int r,int c,char a[][c]){
-    char key,k[10];
+    char key;
     system("cls");
     printf("Main Menu\nPlease,stick to the Given inputs!\nS:Start\nL:Load\nH:HighScore\nQ:Exit\n");
-    scanf("%s",&k);
-    key=k[0];
+    key=getch();
     switch(key){
         case'S':
         case's':
@@ -86,15 +86,17 @@ void MainMenu(int r,int c,char a[][c]){
 }
 }
 void start(int r,int c,char a[][c]){
-    int q;
+    char key;
     system("cls");
-    printf("Select GameMode:\n1:Player Vs Player\n2:Player Vs Computer\n");
-    scanf("%d",&q);//Scan integers only
-    switch(q){
-        case 1:
+    printf("Select GameMode:\nH:Player Vs Player\nC:Player Vs Computer\n");
+    key=getch();
+    switch(key){
+        case 'H':
+        case 'h':
             gameHuman(r,c,a);
             break;
-        case 2:
+        case 'C':
+        case 'c':
             system("cls");
             gameComputer(r,c,a);
             break;
@@ -109,7 +111,7 @@ void gameComputer(int r,int c,char a[][c]){
     while(full(r,c,a)==0){
         printf("\033[0m(~):Menu\n\033[1;31mYour Score:%d\t\033[0;33mComputer Score:%d\n\033[1;31mYour Moves:%d\t\033[0;33mComputer Moves:%d\n",player1.score,player2.score,player1.turns,player2.turns);
         if(w==1){
-            printf("\033[1;31mTime~%02d:%02d\n",(time(NULL)-timr)/60,(time(NULL)-timr)%60);
+            printf("\033[1;31mTime~%02d:%02d\n",(int)(time(NULL)-timr)/60,(int)(time(NULL)-timr)%60);
             printf("\033[1;31mChoose A Bin:");
             e=choose(c,a);
                 if(e==61){
@@ -138,10 +140,12 @@ void gameComputer(int r,int c,char a[][c]){
     }
 }
 void gameHuman(int r,int c,char a[][c]){
+    int turn=1;
+    if(player1.turns>player2.turns)turn=2;
     timr=time(NULL);
     board(r,c,a);
     b.g='h';
-    Turns(1,r,c,a);
+    Turns(turn,r,c,a);
     if(player1.score>player2.score)
         printf("\033[1;31mPlayer 1 Wins!");
     else if(player1.score<player2.score)
@@ -149,16 +153,24 @@ void gameHuman(int r,int c,char a[][c]){
     else
         printf("\033[0mIt's A Draw");
 }
-void Turns(int i,int r,int c,char a[][c]){
+void Turns(int turn,int r,int c,char a[][c]){
     int e;
-    switch(i){
+    switch(turn){
         case 1:
             red();
             printf("(~):Menu\nPlayer 1 Score:%d\nPlayer 1 Moves:%d\n",player1.score,player1.turns);
-            printf("Time~%02d:%02d\n",(time(NULL)-timr)/60,(time(NULL)-timr)%60);
+            printf("Time~%02d:%02d\n",(int)(time(NULL)-timr)/60,(int)(time(NULL)-timr)%60);
             printf("Player 1 Can Choose A Bin:");
             e=choose(c,a);
             if(e==61){
+                    if(c>61){
+                        fill(player1.chip,r,c,a,e);
+                        blue();
+                        board(r,c,a);
+                        player1.score=countFours(player1.chip,r,c,a);
+                        player1.turns++;
+                        turn=2;
+                    }
                     Menu(r,c,a);
                     board(r,c,a);}
             else{
@@ -167,15 +179,23 @@ void Turns(int i,int r,int c,char a[][c]){
             board(r,c,a);
             player1.score=countFours(player1.chip,r,c,a);
             player1.turns++;
-            i=2;}
+            turn=2;}
             break;
         case 2:
             yellow();
             printf("(~):Menu\nPlayer 2 Score:%d\nPlayer 2 Moves:%d\n",player2.score,player2.turns);
-            printf("Time~%02d:%02d\n",(time(NULL)-timr)/60,(time(NULL)-timr)%60);
+            printf("Time~%02d:%02d\n",(int)(time(NULL)-timr)/60,(int)(time(NULL)-timr)%60);
             printf("Player 2 Can Choose A Bin:");
             e=choose(c,a);
             if(e==61){
+                    if(c>61){
+                        fill(player1.chip,r,c,a,e);
+                        blue();
+                        board(r,c,a);
+                        player1.score=countFours(player1.chip,r,c,a);
+                        player1.turns++;
+                        turn=2;
+                    }
                     Menu(r,c,a);
                     board(r,c,a);}
             else{
@@ -184,10 +204,10 @@ void Turns(int i,int r,int c,char a[][c]){
             board(r,c,a);
             player2.score=countFours(player2.chip,r,c,a);
             player2.turns++;
-            i=1;}
+            turn=1;}
             break;
     }
-    if(full(r,c,a)==0)Turns(i,r,c,a);
+    if(full(r,c,a)==0)Turns(turn,r,c,a);
 }
 int countFours(char x,int r,int c,char a[][c]){
     int count=0,f,i,j,k;
@@ -250,14 +270,18 @@ void fill(int chip ,int r,int c,char a[][c],int q){
                        }
 }
 int choose(int c,char a[][c]){
-    char i,I[1000];
-    scanf(" %s",&I);
-    i=I[0]-65;
-    if((a[0][i]==' ')&&(i<c)&&(i>=0)||(i==61))
+    int i;
+    if(c<=58){
+        i=getch()-65;}
+        else{
+            scanf("%d",&i);
+        }
+    if((a[0][i]==' ') && (i<c) && (i>=0) || (i==61))
         return i;
-        else
-            printf("InValid Cloumn!\n");
-            choose(c,a);
+    else{
+        printf("\nInValid Cloumn!");
+        choose(c,a);
+    }
 }
 void columnIndex(int c){
     printf(" ");
@@ -300,20 +324,26 @@ int Random(int e,int c, char a[][c]){
 }
 void save(int r,int c,char a[][c]){
     system("cls");
-    int key;
+    char key;
     FILE *s=NULL;
-    printf("choose slot:\n(1)slot1\n(2)slot2\n(3)slot3\n");
-    scanf("%d",&key);
+    printf("choose slot:\n(a)slot1\n(b)slot2\n(c)slot3\n(d)Back\n");
+    key=getch();
     switch(key){
-        case 1:
+        case 'A':
+        case 'a':
             s=fopen("save1.bin","wb");
             break;
-        case 2:
+        case 'B':
+        case 'b':
             s=fopen("save2.bin","wb");
             break;
-        case 3:
+        case 'C':
+        case 'c':
             s=fopen("save3.bin","wb");
             break;
+        case 'D':
+        case 'd':
+            Menu(r,c,a);
         default:
             save(r,c,a);
         }
@@ -329,17 +359,24 @@ void load(int r,int c,char a[][c]){
     system("cls");
     int key;
     FILE *s=NULL;
-    printf("choose slot:\n(1)slot1\n(2)slot2\n(3)slot3\n");
-    scanf("%d",&key);
+    printf("choose slot:\n(a)slot1\n(b)slot2\n(c)slot3\n(d)Back\n");
+    key=getch();
     switch(key){
-        case 1:
+        case 'A':
+        case 'a':
             s=fopen("save1.bin","rb");
             break;
-        case 2:
+        case 'B':
+        case 'b':
             s=fopen("save2.bin","rb");
             break;
-        case 3:
+        case 'C':
+        case 'c':
             s=fopen("save3.bin","rb");
+            break;
+        case 'D':
+        case 'd':
+            MainMenu(r,c,a);
             break;
         default:
             load(r,c,a);
@@ -356,7 +393,7 @@ void Menu(int r,int c,char a[][c]){
     char key;
     system("cls");
     printf("Menu\nPlease,stick to the Given inputs!\nC:Close\nS:Save\nU:undo\nR:Redo\nQ:Exit\n");
-    scanf(" %c",&key);
+    key=getch();
     switch(key){
         case'C':
         case'c':
@@ -382,13 +419,15 @@ void Menu(int r,int c,char a[][c]){
             Menu(r,c,a);
 }}
 void count(int r,int c,char a[][c]){
-    int c1,c2;
-    for(int i=0;i<r;i++)
+    int c1=0,c2=0;
+    for(int i=0;i<r;i++){
         for(int j=0;j<c;j++){
                 if(a[i][j]=='X')c1++;
                 else if(a[i][j]=='O')c2++;
         }
+    }
     player1.turns=c1;
     player2.turns=c2;
 }
+
 
