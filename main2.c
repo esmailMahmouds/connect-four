@@ -238,11 +238,11 @@ int countFours(char x,int r,int c,char a[][c]){
             if(f==4)count++;
         }
     }
-    for(i=r-1;i>=3;i--){
-        for(j=c-1;j>=3;j--){
+    for(i=0;i<r-3;i++){
+        for(j=3;j<c;j++){
             f=0;
             for(k=0;k<4;k++)
-                if(a[i-k][j-k]==x)
+                if(a[i+k][j-k]==x)
                 f++;
             if(f==4)count++;
         }
@@ -413,7 +413,7 @@ void Menu(int r,int c,char a[][c]){
             break;
         case'Q':
         case'q':
-            MainMenu(r,c,a);
+            main();
             break;
         default:
             Menu(r,c,a);
