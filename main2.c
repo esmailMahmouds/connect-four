@@ -3,10 +3,8 @@
 #include <windows.h>
 #include <time.h>
 #include <conio.h>
-struct q{
-    char g;
-    }b;
-struct p{
+char gameMode;
+struct playerData{
     char name;
     int colour;
     int turns;
@@ -69,9 +67,9 @@ void MainMenu(int r,int c,char a[][c]){
             count(r,c,a);
             player1.score=countFours(player1.chip,r,c,a);
             player2.score=countFours(player2.chip,r,c,a);
-            if(b.g=='h')
+            if(gameMode=='h')
                 gameHuman(r,c,a);
-            if(b.g=='c')
+            if(gameMode=='c')
                 gameComputer(r,c,a);
             break;
          case'H':
@@ -107,7 +105,7 @@ void start(int r,int c,char a[][c]){
 void gameComputer(int r,int c,char a[][c]){
     timr=time(NULL);
     int e=c/2,w=1;
-    b.g='c';
+    gameMode='c';
     board(r,c,a);
     while(full(r,c,a)==0){
         printf("\033[0m(~):Menu\n\033[1;31mYour Score:%d\t\033[0;33mComputer Score:%d\n\033[1;31mYour Moves:%d\t\033[0;33mComputer Moves:%d\n",player1.score,player2.score,player1.turns,player2.turns);
@@ -144,7 +142,7 @@ void gameHuman(int r,int c,char a[][c]){
     if(player1.turns>player2.turns)turn=2;
     timr=time(NULL);
     board(r,c,a);
-    b.g='h';
+    gameMode='h';
     Turns(turn,r,c,a);
     End();
 }
@@ -348,7 +346,7 @@ void save(int r,int c,char a[][c]){
     for(int i=0; i<r; i++)
         for(int j=0; j<c; j++)
             fwrite(&a[i][j],sizeof(char),1,s);
-    fwrite(&b.g,sizeof(int),1,s);
+    fwrite(&gameMode,sizeof(int),1,s);
     fclose(s);
 }
 void load(int r,int c,char a[][c]){
@@ -382,7 +380,7 @@ void load(int r,int c,char a[][c]){
     for(int i=0; i<r; i++)
         for(int j=0; j<c; j++)
             fread(&a[i][j],sizeof(char),1,s);
-    fread(&b.g,sizeof(char),1,s);
+    fread(&gameMode,sizeof(char),1,s);
     fclose(s);
 }
 void Menu(int r,int c,char a[][c]){
@@ -434,5 +432,7 @@ if(player1.score>player2.score)
         printf("\033[0mIt's A Draw");
 exit(0);
 }
+void HighScore(){
 
 
+}
