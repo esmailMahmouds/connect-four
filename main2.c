@@ -38,10 +38,11 @@ void start(int r,int c,char a[][c]);
 void MainMenu(int r,int c,char a[][c]);
 void save(int r,int c,char a[][c]);
 void load(int r,int c,char a[][c]);
+void End();
 //════════════════════════════════════════════════════════════════════════
 
 int main(){
-    int r=7,c=14,x=10;
+    int r=31,c=61,x=10;
     char a[r][c];
     player1.colour=1;player1.chip='X';player1.turns=0;player1.score=0;
     player2.colour=2;player2.chip='O';player2.turns=0;player2.score=0;
@@ -120,8 +121,6 @@ void gameComputer(int r,int c,char a[][c]){
                         }
                 else{
                 fill(player1.chip,r,c,a,e);
-                blue();
-                board(r,c,a);
                 player1.score=countFours(player1.chip,r,c,a);
                 player1.turns++;
                 w=2;
@@ -138,6 +137,7 @@ void gameComputer(int r,int c,char a[][c]){
         }
 
     }
+    End();
 }
 void gameHuman(int r,int c,char a[][c]){
     int turn=1;
@@ -146,12 +146,7 @@ void gameHuman(int r,int c,char a[][c]){
     board(r,c,a);
     b.g='h';
     Turns(turn,r,c,a);
-    if(player1.score>player2.score)
-        printf("\033[1;31mPlayer 1 Wins!");
-    else if(player1.score<player2.score)
-        printf("\033[0;33mPlayer 2 Wins!");
-    else
-        printf("\033[0mIt's A Draw");
+    End();
 }
 void Turns(int turn,int r,int c,char a[][c]){
     int e;
@@ -274,7 +269,8 @@ int choose(int c,char a[][c]){
     if(c<=58){
         i=getch()-65;}
         else{
-            scanf("%d",&i);
+            if(1 != scanf("%d",&i))
+                scanf(" %c",&i);
         }
     if((a[0][i]==' ') && (i<c) && (i>=0) || (i==61))
         return i;
@@ -428,6 +424,15 @@ void count(int r,int c,char a[][c]){
     }
     player1.turns=c1;
     player2.turns=c2;
+}
+void End(){
+if(player1.score>player2.score)
+        printf("\033[1;31mPlayer 1 Wins!");
+    else if(player1.score<player2.score)
+        printf("\033[0;33mPlayer 2 Wins!");
+    else
+        printf("\033[0mIt's A Draw");
+exit(0);
 }
 
 
