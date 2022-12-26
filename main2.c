@@ -3,19 +3,25 @@
 #include <windows.h>
 #include <time.h>
 #include <conio.h>
-
+#define MaxScoreLen 9;
+#define MaxNameLen 13;
+int r,c,x;
 char gameMode;
-struct playerData{
-    char name;
+typedef struct Data{
+    char name[13];
     int colour;
     int turns;
     int score;
     char chip;
-}player1,player2;
+}playerData;
+playerData player1,player2;
+typedef struct Scores{
+    char name[13];
+    int score;
+}High;
+High p[10],winnerData;
 long long timr;
 int MaxRedo=0;
-
-
 
 void blue(){printf("\033[0;34m");}
 void red(){printf("\033[1;31m");}
@@ -38,7 +44,8 @@ void start(int r,int c,char a[][c]);
 void MainMenu(int r,int c,char a[][c]);
 void save(int r,int c,char a[][c],char RU[][r][c]);
 void load(int r,int c,char a[][c]);
-void HighScoreLoad();
+void HighScoreSave(int x,int winner);
+void HighScoreLoad(int x);
 void quickSave(int r,int c,char a[][c],char RU[][r][c]);
 void quickLoad(int r,int c,char a[][c],char RU[][r][c]);
 void Undo(int r,int c,char a[][c],char RU[][r][c]);
@@ -47,7 +54,7 @@ void End();
 //════════════════════════════════════════════════════════════════════════
 
 int main(){
-    int r=7,c=13,x=10;
+    r=7,c=9,x=10;
     char a[r][c];
     player1.colour=1;player1.chip='X';player1.turns=0;player1.score=0;
     player2.colour=2;player2.chip='O';player2.turns=0;player2.score=0;
@@ -80,7 +87,9 @@ void MainMenu(int r,int c,char a[][c]){
                 gameComputer(r,c,a);
             break;
          case'H':
-         case'h':;
+         case'h':
+            HighScoreLoad(x);
+            MainMenu(r,c,a);
             break;
         case'Q':
         case'q':
@@ -134,7 +143,7 @@ void gameComputer(int r,int c,char a[][c]){
                 player1.turns++;
             }
         }
-        if(player1.turns>player2.turns){
+        if(player1.turns>player2.turns&&full(r,c,a)==0){
                 e=Random(e,c,a);
                 fill(player2.chip,r,c,a,e);
                 blue();
@@ -183,7 +192,7 @@ void gameHuman(int r,int c,char a[][c]){
             quickSave(r,c,a,RU);
             if(MaxRedo<(player1.turns+player2.turns))
                     MaxRedo=player1.turns+player2.turns;
-            if(player1.turns>player2.turns){
+            if(player1.turns>player2.turns&&full(r,c,a)==0){
                 yellow();
                 printf("(~):Menu\nPlayer 2 Score:%d\nPlayer 2 Moves:%d\n",player2.score,player2.turns);
                 printf("Time~%02d:%02d\n",(int)(time(NULL)-timr)/60,(int)(time(NULL)-timr)%60);
@@ -395,6 +404,7 @@ void load(int r,int c,char a[][c]){
 void Menu(int r,int c,char a[][c],char RU[][r][c]){
     char key;
     system("cls");
+    board(r,c,a);
     printf("Menu\nPlease,stick to the Given inputs!\nC:Close\nS:Save\nU:undo\nR:Redo\nQ:Exit\n");
     key=getch();
     switch(key){
@@ -409,10 +419,12 @@ void Menu(int r,int c,char a[][c],char RU[][r][c]){
         case'U':
         case'u':
             Undo(r,c,a,RU);
+            Menu(r,c,a,RU);
             break;
         case'R':
         case'r':
             Redo(r,c,a,RU);
+            Menu(r,c,a,RU);
             break;
         case'Q':
         case'q':
@@ -432,15 +444,6 @@ void count(int r,int c,char a[][c]){
     player1.turns=c1;
     player2.turns=c2;
 }
-void End(){
-if(player1.score>player2.score)
-        printf("\033[1;31mPlayer 1 Wins!");
-    else if(player1.score<player2.score)
-        printf("\033[0;33mPlayer 2 Wins!");
-    else
-        printf("\033[0mIt's A Draw");
-exit(0);
-}
 void quickSave(int r,int c,char a[][c],char RU[][r][c]){
     for(int i=0;i<r;i++)
         for(int j=0;j<c;j++)
@@ -450,6 +453,8 @@ void quickLoad(int r,int c,char a[][c],char RU[][r][c]){
     for(int i=0;i<r;i++)
         for(int j=0;j<c;j++)
             a[i][j]=RU[player1.turns+player2.turns][i][j];
+    player1.score=countFours(player1.chip,r,c,a);
+    player2.score=countFours(player2.chip,r,c,a);
 }
 void Undo(int r,int c,char a[][c],char RU[][r][c]){
     if(player1.turns>0){
@@ -480,5 +485,117 @@ void Redo(int r,int c,char a[][c],char RU[][r][c]){
         }
         quickLoad(r,c,a,RU);
     }
+}
+void HighScoreSave(int x,int winner){
+    system("cls");
+    printf("HighScores\n");
+    int Found=0;
+    if(winner==1){
+        winnerData.score=player1.score;
+        strcpy(winnerData.name,player1.name);
+        }
+    else if(winner==2){
+        winnerData.score=player2.score;
+        strcpy(winnerData.name,player2.name);
+        }
+    FILE *s=NULL;
+    s=fopen("HighScores.dat","rb");
+    if(s!=NULL){
+        fread(p,sizeof(High),x,s);
+    }
+    else{
+        strcpy(p[1].name,winnerData.name);
+        p[1].score=winnerData.score;
+    }
+    fclose(s);
+    FILE *f=NULL;
+    f=fopen("HighScores.dat","wb");
+    for(int i=0;i<x;i++){
+        if(strcasecmp(p[i].name,winnerData.name)==0){
+            Found=1;
+            if(p[i].score<winnerData.score){
+                p[i].score=winnerData.score;
+            }
+            break;
+        }
+    }
+    if(Found==0){
+            if(winnerData.score>p[x-1].score){
+                p[x-1].score=winnerData.score;
+                strcpy(p[x-1].name,winnerData.name);
+            }
+    }
+    char tempName[13];
+    int tempScore;
+    for(int i=0;i<x;i++){
+            for(int j=i+1;j<x;j++){
+                    if(p[i].score<p[j].score){
+                        tempScore=p[i].score;
+                        strcpy(tempName,p[i].name);
+                        p[i].score=p[j].score;
+                        strcpy(p[i].name,p[j].name);
+                        p[j].score=tempScore;
+                        strcpy(p[j].name,tempName);
+                    }
+            }
+    }
+    fwrite(p,sizeof(High),x,f);
+    fclose(f);
+    for(int i=0;i<x;i++){
+        printf("%d.%s %d\n",i+1,p[i].name,p[i].score);
+    }
+    sleep(1);
+}
+void HighScoreLoad(int x){
+    char Back;
+    system("cls");
+    printf("HighScores\n");
+    FILE *s=NULL;
+    s=fopen("HighScores.dat","rb");
+    if(s==NULL){
+        printf("NOT FOUND!");
+        sleep(1);
+    }
+    else{
+        fread(p,sizeof(High),x,s);
+        for(int i=0;i<x;i++){
+            printf("%d.%s %d\n",i+1,p[i].name,p[i].score);
+            }
+        printf("(b)Back:");
+        Back=getch();
+        if(Back!='b' && Back!='B')
+            HighScoreLoad(x);
+        fclose(s);
+    }
+}
+void End(){
+    reset();
+    int winner;
+    if(player1.score>player2.score){
+        printf("\033[1;31mPlayer 1 Wins!\nName Of Our Champ:");
+        scanf("%s",player1.name);
+        HighScoreSave(x,1);
+    }
+    else if(player1.score<player2.score&&gameMode=='h'){
+        printf("\033[0;33mPlayer 2 Wins!\nName Of Our Champ:");
+        scanf("%s",player2.name);
+        HighScoreSave(x,2);
+    }
+    else if(player1.score==player2.score&&gameMode=='h'){
+        printf("\033[0mIt's A Draw\nName of Player1:");
+        scanf("%s",player1.name);
+        HighScoreSave(x,1);
+        printf("\033[0m\nName of Player2:");
+         scanf("%s",player2.name);
+        HighScoreSave(x,2);
+    }
+    else
+        printf("\nCouldn't Defeat me!,Bye%c\n",259);
+    char option;
+    printf("|(Press any Button to Continue) OR (Q) to Leave us!|\n");
+    option = getch();
+    if(option=='q'||option=='Q')
+        exit(0);
+    main();
 }
 
