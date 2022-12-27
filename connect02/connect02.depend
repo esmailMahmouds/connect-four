@@ -1,0 +1,15 @@
+# depslib dependency file v1.0
+1672137371 source:e:\project_1\connect02\main.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<ctype.h>
+	"xml.h"
+
+1672148580 source:e:\project_1\connect02\xml.c
+	<stdio.h>
+	<string.h>
+	<ctype.h>
+
+1672134075 e:\project_1\connect02\xml.h
+
