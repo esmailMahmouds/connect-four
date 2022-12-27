@@ -132,7 +132,7 @@ void gameComputer(int r,int c,char a[][c]){
             printf("\033[1;31mTime~%02d:%02d\n",(int)(time(NULL)-timr)/60,(int)(time(NULL)-timr)%60);
             printf("\033[1;31mChoose A Bin:");
             e=choose(c,a);
-            if(e==61){
+            if(e==-13){
                     Menu(r,c,a,RU);
                     board(r,c,a);
             }
@@ -170,16 +170,10 @@ void gameHuman(int r,int c,char a[][c]){
                 printf("Time~%02d:%02d\n",(int)(time(NULL)-timr)/60,(int)(time(NULL)-timr)%60);
                 printf("Player 1 Can Choose A Bin:");
                 e=choose(c,a);
-                if(e==61){
-                    if(c>61){
-                        fill(player1.chip,r,c,a,e);
-                        blue();
-                        board(r,c,a);
-                        player1.score=countFours(player1.chip,r,c,a);
-                        player1.turns++;
-                    }
+                if(e==-13){
                     Menu(r,c,a,RU);
-                    board(r,c,a);}
+                    board(r,c,a);
+                    }
                 else{
                     MaxRedo=player1.turns+player2.turns;
                     fill(player1.chip,r,c,a,e);
@@ -198,14 +192,7 @@ void gameHuman(int r,int c,char a[][c]){
                 printf("Time~%02d:%02d\n",(int)(time(NULL)-timr)/60,(int)(time(NULL)-timr)%60);
                 printf("Player 2 Can Choose A Bin:");
                 e=choose(c,a);
-                if(e==61){
-                    if(c>61){
-                        fill(player1.chip,r,c,a,e);
-                        blue();
-                        board(r,c,a);
-                        player1.score=countFours(player1.chip,r,c,a);
-                        player1.turns++;
-                    }
+                if(e==-13){
                     Menu(r,c,a,RU);
                     board(r,c,a);}
                 else{
@@ -282,24 +269,39 @@ void fill(int chip ,int r,int c,char a[][c],int q){
 }
 int choose(int c,char a[][c]){
     int i;
+    char numberCols[9];
     if(c<=58){
-        i=getch()-65;}
-        else{
-            if(1 != scanf("%d",&i))
-                scanf(" %c",&i);
-        }
-    if((a[0][i]==' ') && (i<c) && (i>=0) || (i==61)){
-        return i;}
+        i=getch()-65;
+        if(i==61)
+            i=-13;
+    }
+    else{
+        scanf(" %s",&numberCols);
+        i=atoi(numberCols)-1;
+        if(numberCols[0]=='~')
+            i=-13;
+    }
+    if((a[0][i]==' ') && (i<c) && (i>=0) || (i==-13)){
+        return i;
+    }
     else{
         printf("\nInValid Cloumn!");
         choose(c,a);
     }
 }
 void columnIndex(int c){
-    printf(" ");
-    for(int i=65;(i<65+c)&&(i<=122);i++)
-        printf("%c ",i);
-    printf("\n");
+    if(c<59){
+        printf("  ");
+        for(int i=65;(i<65+c)&&(i<=122);i++)
+            printf(" %c  ",i);
+        printf("\n");
+    }
+    else{
+        printf("  ");
+        for(int i=1;i<=c;i++)
+            printf("%03d ",i);
+        printf("\n");
+    }
 }
 void board(int r,int c,char a[][c]){
     system("cls");
@@ -309,7 +311,7 @@ void board(int r,int c,char a[][c]){
     for(int i=0;i<r;i++){
         for(int j=0;j<c;j++){
             blue();
-            printf("%c",186);
+            printf(" %c ",186);
             if (a[i][j]=='X'){
                     red();
                     printf("%c",a[i][j]);}
@@ -319,13 +321,15 @@ void board(int r,int c,char a[][c]){
             else printf("%c",a[i][j]);
             }
         blue();
-        printf("%c\n",186);
+        printf(" %c\n",186);
         bar(c);
 }}
 void bar(int c){
-    for(int k=0;k<c+1;k++)
-        printf("%c%c",206,205);
-    printf("\n");
+        printf(" ");
+        for(int i=0;i<c;i++)
+            printf("%c%c%c%c",206,205,205,205);
+        printf("%c",206);
+        printf("\n");
 }
 int Random(int e,int c, char a[][c]){
     srand(time(NULL));
@@ -598,4 +602,5 @@ void End(){
         exit(0);
     main();
 }
+
 
