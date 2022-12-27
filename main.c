@@ -3,6 +3,8 @@
 #include <windows.h>
 #include <time.h>
 #include <conio.h>
+#include <ctype.h>
+#include "xml.h"
 #define MaxScoreLen 9;
 #define MaxNameLen 13;
 int r,c,x;
@@ -36,25 +38,28 @@ void initiate(int r,int c,char a[][c]);
 int choose(int c,char a[][c]);
 void fill(int chip ,int r,int c,char a[][c],int q);
 void board(int r,int c,char a[][c]);
-void Menu(int r,int c,char a[][c],char RU[][r][c]);
+void Menu(int r,int c,char a[][c],int RU[]);
 int Random(int e,int c,char a[][c]);
 void gameHuman(int r,int c,char a[][c]);
 void gameComputer(int r,int c,char a[][c]);
 void start(int r,int c,char a[][c]);
 void MainMenu(int r,int c,char a[][c]);
-void save(int r,int c,char a[][c],char RU[][r][c]);
+void save(int r,int c,char a[][c],int RU[]);
 void load(int r,int c,char a[][c]);
 void HighScoreSave(int x,int winner);
 void HighScoreLoad(int x);
-void quickSave(int r,int c,char a[][c],char RU[][r][c]);
-void quickLoad(int r,int c,char a[][c],char RU[][r][c]);
-void Undo(int r,int c,char a[][c],char RU[][r][c]);
-void Redo(int r,int c,char a[][c],char RU[][r][c]);
+void Rmve(int r,int c,char a[][c],int RU[],int e);
+void Undo(int r,int c,char a[][c],int RU[]);
+void Redo(int r,int c,char a[][c],int RU[]);
 void End();
 //════════════════════════════════════════════════════════════════════════
 
 int main(){
-    r=7,c=9,x=10;
+    int parameters[3];
+    read_xml(parameters);
+    r=parameters[0];
+    c=parameters[1];
+    x=parameters[2];
     char a[r][c];
     player1.colour=1;player1.chip='X';player1.turns=0;player1.score=0;
     player2.colour=2;player2.chip='O';player2.turns=0;player2.score=0;
@@ -119,13 +124,12 @@ void start(int r,int c,char a[][c]){
 }
 void gameComputer(int r,int c,char a[][c]){
     timr=time(NULL);
-    char RU[c*r][r][c];
-    int e=c/2,w=1;
+    int RU[c*r];
+    int e=c/2;
     gameMode='c';
     board(r,c,a);
     while(full(r,c,a)==0){
         printf("\033[0m(~):Menu\n\033[1;31mYour Score:%d\t\033[0;33mComputer Score:%d\n\033[1;31mYour Moves:%d\t\033[0;33mComputer Moves:%d\n",player1.score,player2.score,player1.turns,player2.turns);
-        quickSave(r,c,a,RU);
         if(MaxRedo<(player1.turns+player2.turns))
             MaxRedo=player1.turns+player2.turns;
         if(player1.turns<=player2.turns){
@@ -137,6 +141,9 @@ void gameComputer(int r,int c,char a[][c]){
                     board(r,c,a);
             }
             else{
+                RU[player1.turns+player2.turns]=e;
+                for(int i=player1.turns+player2.turns+1;i<r*c;i++)
+                    RU[i]=-1;
                 MaxRedo=player1.turns+player2.turns;
                 fill(player1.chip,r,c,a,e);
                 player1.score=countFours(player1.chip,r,c,a);
@@ -145,6 +152,9 @@ void gameComputer(int r,int c,char a[][c]){
         }
         if(player1.turns>player2.turns&&full(r,c,a)==0){
                 e=Random(e,c,a);
+                RU[player1.turns+player2.turns]=e;
+                for(int i=player1.turns+player2.turns+1;i<r*c;i++)
+                    RU[i]=-1;
                 fill(player2.chip,r,c,a,e);
                 blue();
                 board(r,c,a);
@@ -156,14 +166,11 @@ void gameComputer(int r,int c,char a[][c]){
 }
 void gameHuman(int r,int c,char a[][c]){
     timr=time(NULL);
-    char RU[c*r][r][c];
+    int RU[r*c];
     int e;
     board(r,c,a);
     gameMode='h';
     while(full(r,c,a)==0){
-            quickSave(r,c,a,RU);
-            if(MaxRedo<(player1.turns+player2.turns))
-                    MaxRedo=player1.turns+player2.turns;
             if(player1.turns<=player2.turns){
                 red();
                 printf("(~):Menu\nPlayer 1 Score:%d\nPlayer 1 Moves:%d\n",player1.score,player1.turns);
@@ -173,9 +180,11 @@ void gameHuman(int r,int c,char a[][c]){
                 if(e==-13){
                     Menu(r,c,a,RU);
                     board(r,c,a);
-                    }
+                }
                 else{
-                    MaxRedo=player1.turns+player2.turns;
+                    RU[player1.turns+player2.turns]=e;
+                    for(int i=player1.turns+player2.turns+1;i<r*c;i++)
+                        RU[i]=-1;
                     fill(player1.chip,r,c,a,e);
                     blue();
                     board(r,c,a);
@@ -183,9 +192,6 @@ void gameHuman(int r,int c,char a[][c]){
                     player1.turns++;
                 }
             }
-            quickSave(r,c,a,RU);
-            if(MaxRedo<(player1.turns+player2.turns))
-                    MaxRedo=player1.turns+player2.turns;
             if(player1.turns>player2.turns&&full(r,c,a)==0){
                 yellow();
                 printf("(~):Menu\nPlayer 2 Score:%d\nPlayer 2 Moves:%d\n",player2.score,player2.turns);
@@ -196,7 +202,9 @@ void gameHuman(int r,int c,char a[][c]){
                     Menu(r,c,a,RU);
                     board(r,c,a);}
                 else{
-                    MaxRedo=player1.turns+player2.turns;
+                    RU[player1.turns+player2.turns]=e;
+                    for(int i=player1.turns+player2.turns+1;i<r*c;i++)
+                        RU[i]=-1;
                     fill(player2.chip,r,c,a,e);
                     blue();
                     board(r,c,a);
@@ -260,12 +268,26 @@ void initiate(int r,int c,char a[][c]){
             a[i][j]=' ';
 }
 void fill(int chip ,int r,int c,char a[][c],int q){
-    int i;
-    for(i=r-1;i>=0;i--){
-        if (a[i][q]==' '){
-            a[i][q]= chip;
-            break;              }
-                       }
+    if(q>=0){
+        int i;
+        if(a[0][q]==' '&&a[1][q]!=' '){
+                a[0][q]=chip;
+        }
+        else{
+            a[0][q]=chip;
+            for(i=1;i<r;i++){
+                if(a[i][q]==' '){
+                    board(r,c,a);
+                    Beep(200,75);
+                    a[i-1][q]=' ';
+                    a[i][q]=chip;
+                }
+           }
+        }
+        Beep(500,30);
+        Beep(300,40);
+        Beep(400,50);
+    }
 }
 int choose(int c,char a[][c]){
     int i;
@@ -338,7 +360,7 @@ int Random(int e,int c, char a[][c]){
     while(a[0][e]!=' '&&e>=0)e--;
     return e;
 }
-void save(int r,int c,char a[][c],char RU[][r][c]){
+void save(int r,int c,char a[][c],int RU[]){
     system("cls");
     char key;
     FILE *s=NULL;
@@ -405,7 +427,7 @@ void load(int r,int c,char a[][c]){
     fread(&gameMode,sizeof(char),1,s);
     fclose(s);
 }
-void Menu(int r,int c,char a[][c],char RU[][r][c]){
+void Menu(int r,int c,char a[][c],int RU[]){
     char key;
     system("cls");
     board(r,c,a);
@@ -435,6 +457,8 @@ void Menu(int r,int c,char a[][c],char RU[][r][c]){
             main();
             break;
         default:
+            player1.score=countFours(player1.chip,r,c,a);
+            player2.score=countFours(player2.chip,r,c,a);
             Menu(r,c,a,RU);
 }}
 void count(int r,int c,char a[][c]){
@@ -448,46 +472,51 @@ void count(int r,int c,char a[][c]){
     player1.turns=c1;
     player2.turns=c2;
 }
-void quickSave(int r,int c,char a[][c],char RU[][r][c]){
-    for(int i=0;i<r;i++)
-        for(int j=0;j<c;j++)
-            RU[player1.turns+player2.turns][i][j]=a[i][j];
+void Rmve(int r,int c,char a[][c],int RU[],int e){
+    if(e>=0){
+        for(int i=0;i<r;i++){
+                if(a[i][e]!=' '){
+                    a[i][e]=' ';
+                    break;
+                }
+        }
+    }
 }
-void quickLoad(int r,int c,char a[][c],char RU[][r][c]){
-    for(int i=0;i<r;i++)
-        for(int j=0;j<c;j++)
-            a[i][j]=RU[player1.turns+player2.turns][i][j];
-    player1.score=countFours(player1.chip,r,c,a);
-    player2.score=countFours(player2.chip,r,c,a);
-}
-void Undo(int r,int c,char a[][c],char RU[][r][c]){
+void Undo(int r,int c,char a[][c],int RU[]){
     if(player1.turns>0){
         if(gameMode=='h'){
                 if(player1.turns==player2.turns)
                     player2.turns--;
                 else
                     player1.turns--;
+                Rmve(r,c,a,RU,RU[player1.turns+player2.turns]);
         }
         else if(gameMode=='c'){
                 player1.turns--;
+                Rmve(r,c,a,RU,RU[player1.turns+player2.turns]);
                 player2.turns--;
+                Rmve(r,c,a,RU,RU[player1.turns+player2.turns]);
         }
-        quickLoad(r,c,a,RU);
     }
 }
-void Redo(int r,int c,char a[][c],char RU[][r][c]){
-    if(player1.turns+player2.turns<MaxRedo){
+void Redo(int r,int c,char a[][c],int RU[]){
+    if(RU[player1.turns+player2.turns]!=-1){
         if(gameMode=='h'){
-                if(player1.turns>player2.turns)
+                if(player1.turns>player2.turns){
+                    fill(player2.chip,r,c,a,RU[player1.turns+player2.turns]);
                     player2.turns++;
-                else
+                }
+                else{
+                    fill(player1.chip,r,c,a,RU[player1.turns+player2.turns]);
                     player1.turns++;
+                }
         }
         else if(gameMode=='c'){
+                fill(player1.chip,r,c,a,RU[player1.turns+player2.turns]);
                 player1.turns++;
+                fill(player2.chip,r,c,a,RU[player1.turns+player2.turns]);
                 player2.turns++;
         }
-        quickLoad(r,c,a,RU);
     }
 }
 void HighScoreSave(int x,int winner){
@@ -573,6 +602,7 @@ void HighScoreLoad(int x){
     }
 }
 void End(){
+    system("cls");
     reset();
     int winner;
     if(player1.score>player2.score){
