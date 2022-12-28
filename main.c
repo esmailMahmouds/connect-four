@@ -7,6 +7,7 @@
 #include "xml.h"
 #define MaxScoreLen 9;
 #define MaxNameLen 13;
+
 int r,c,x;
 char gameMode;
 typedef struct Data{
@@ -52,7 +53,6 @@ void save(int r,int c,char a[][c],int RU[]);
 void load(int r,int c,char a[][c]);
 void HighScoreSave(int x,int winner);
 void HighScoreLoad(int x);
-
 void Undo(int r,int c,char a[][c],int RU[]);
 void Redo(int r,int c,char a[][c],int RU[]);
 void End();
@@ -176,8 +176,8 @@ void gameHuman(int r,int c,char a[][c]){
     while(full(r,c,a)==0){
             if(player1.turns<=player2.turns){
                 red();
-                printf("(~):Menu\nPlayer 1 Score:%d\nPlayer 1 Moves:%d\n",player1.score,player1.turns);
-                printf("Time~%02d:%02d\n",(int)(time(NULL)-timr)/60,(int)(time(NULL)-timr)%60);
+                printf("\033[0m(~):Menu\n\033[1;31mPlayer 1 Score:%d\t\033[0;33mPlayer 2 Score:%d\n\033[1;31mPlayer 1 Moves:%d\t\033[0;33mPlayer 2 Moves:%d\n",player1.score,player2.score,player1.turns,player2.turns);
+                printf("\033[1;31mTime~%02d:%02d\n",(int)(time(NULL)-timr)/60,(int)(time(NULL)-timr)%60);
                 printf("Player 1 Can Choose A Bin:");
                 e=choose(c,a);
                 if(e==-13){
@@ -197,8 +197,8 @@ void gameHuman(int r,int c,char a[][c]){
             }
             if(player1.turns>player2.turns&&full(r,c,a)==0){
                 yellow();
-                printf("(~):Menu\nPlayer 2 Score:%d\nPlayer 2 Moves:%d\n",player2.score,player2.turns);
-                printf("Time~%02d:%02d\n",(int)(time(NULL)-timr)/60,(int)(time(NULL)-timr)%60);
+               printf("\033[0m(~):Menu\n\033[0;33mPlayer 2 Score:%d\t\033[1;31mPlayer 1 Score:%d\n\033[0;33mPlayer 2 Moves:%d\t\033[1;31mPlayer 1 Moves:%d\n",player2.score,player1.score,player2.turns,player1.turns);
+                printf("\033[0;33mTime~%02d:%02d\n",(int)(time(NULL)-timr)/60,(int)(time(NULL)-timr)%60);
                 printf("Player 2 Can Choose A Bin:");
                 e=choose(c,a);
                 if(e==-13){
@@ -375,9 +375,11 @@ int AI(int r,int c, char a[][c]){
     for(int i=0;i<r;i++)
         for(int j=0;j<c;j++)
             Test[i][j]=a[i][j];
+    for(int i=0;i<c;i++)
+        choices[i].choiceScore=-(c*r);
     for(int i=0;i<c;i++){
+            choices[i].sampleColumn=i;
             if(Test[0][i]==' '){
-                choices[i].sampleColumn=i;
                 fill(player2.chip,r,c,Test,i);
                 for(int j=0;j<c;j++){
                         fill(player1.chip,r,c,Test,j);
@@ -410,7 +412,7 @@ int AI(int r,int c, char a[][c]){
         }
     }
     Animation=animationState;
-    while(a[0][Chosen]!=' ')
+    while(a[0][choices[Chosen].sampleColumn]!=' ')
         Chosen++;
     return choices[Chosen].sampleColumn;
 }
