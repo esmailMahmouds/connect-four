@@ -522,9 +522,6 @@ int AI(int r,int c, char a[][c]){
             }
         }
     }
-    for(int i=0;i<c;i++)
-        printf("(%d %d),",choices[i].sampleColumn,choices[i].choiceScore);
-    getch();
     Animation=animationState;
     while(a[0][choices[Chosen].sampleColumn]!=' ')
         Chosen++;
