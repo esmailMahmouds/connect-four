@@ -1,0 +1,24 @@
+# depslib dependency file v1.0
+1672096819 source:d:\engineering\programming\project\connect 1\main.c
+	<stdio.h>
+	<stdlib.h>
+	<windows.h>
+	<time.h>
+	<conio.h>
+
+1672324790 source:d:\engineering\programming\project\connect 4\main.c
+	<stdio.h>
+	<stdlib.h>
+	<windows.h>
+	<time.h>
+	<conio.h>
+	<ctype.h>
+	"xml.h"
+
+1672150142 d:\engineering\programming\project\connect 4\xml.h
+
+1672151537 source:d:\engineering\programming\project\connect 4\xml.c
+	<stdio.h>
+	<string.h>
+	<ctype.h>
+
