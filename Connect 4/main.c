@@ -13,7 +13,7 @@ typedef struct{
         int c;
         int x;
 }rcx;
-rcx prmtrs;
+rcx prmtrs,prmtrsHold;
 char gameMode;
 typedef struct{
     char name[13];
@@ -40,7 +40,7 @@ void red(){printf("\033[1;31m");}
 void yellow(){printf("\033[0;33m");}
 void reset(){printf("\033[0m");}
 
-void End();
+void End(char a[][prmtrs.c]);
 void HighScoreLoad();
 void HighScoreSave(int winner);
 void Redo(char a[][prmtrs.c],int RU[]);
@@ -68,9 +68,9 @@ void MainMenu(char a[][prmtrs.c]);
 int main(){
     int parameters[3];
     read_xml(parameters);
-    prmtrs.r=parameters[0];
-    prmtrs.c=parameters[1];
-    prmtrs.x=parameters[2];
+    prmtrsHold.r=prmtrs.r=parameters[0];
+    prmtrsHold.c=prmtrs.c=parameters[1];
+    prmtrsHold.x=prmtrs.x=parameters[2];
     char a[prmtrs.r][prmtrs.c];
     for(int i=0;i<13;i++)
         Empty[i]=' ';
@@ -83,6 +83,9 @@ int main(){
 //════════════════════════════════════════════════════════════════════════
 
 void MainMenu(char a[][prmtrs.c]){
+    prmtrs.r=prmtrsHold.r;
+    prmtrs.c=prmtrsHold.c;
+    prmtrs.x=prmtrsHold.x;
     char key;
     system("cls");
     printf("Main Menu\nPlease,stick to the Given inputs!\nS:Start\nL:Load\nH:HighScores\nQ:Exit\n");
@@ -192,7 +195,7 @@ void gameComputer(char a[][prmtrs.c]){
                 player2.turns++;
         }
     }
-    End();
+    End(a);
 }
 void gameHuman(char a[][prmtrs.c]){
     timr=time(NULL);
@@ -247,7 +250,7 @@ void gameHuman(char a[][prmtrs.c]){
                 }
             }
     }
-    End();
+    End(a);
 }
 void Menu(char a[][prmtrs.c],int RU[]){
     char key;
@@ -287,7 +290,7 @@ void Menu(char a[][prmtrs.c],int RU[]){
             break;
         case'Q':
         case'q':
-            main();
+            MainMenu(a);
             break;
         default:
             player1.score=countFours(player1.chip,a);
@@ -758,7 +761,7 @@ void HighScoreLoad(){
         fclose(s);
     }
 }
-void End(){
+void End(char a[][prmtrs.c]){
     system("cls");
     int winner;
     if(player1.score>player2.score){
@@ -786,5 +789,5 @@ void End(){
     option = getch();
     if(option=='q'||option=='Q')
         exit(0);
-    main();
+    MainMenu(a);
 }
