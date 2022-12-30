@@ -8,27 +8,32 @@
 #define MaxScoreLen 9;
 #define MaxNameLen 13;
 
-int r,c,x;
+typedef struct{
+        int r;
+        int c;
+        int x;
+}rcx;
+rcx prmtrs;
 char gameMode;
-typedef struct Data{
+typedef struct{
     char name[13];
     int colour;
     int turns;
     int score;
     char chip;
 }playerData;
-playerData player1,player2;
-typedef struct Scores{
+typedef struct{
     char name[13];
     int score;
-}High;
-char Empty[13];
+}HighScr;
 typedef struct{
         int sampleColumn;
         int choiceScore;
 }BestChoice;
+playerData player1,player2;
+char Empty[13];
 long long timr;
-int Animation=1;
+int Animation=0;
 
 void blue(){printf("\033[0;34m");}
 void red(){printf("\033[1;31m");}
@@ -36,201 +41,214 @@ void yellow(){printf("\033[0;33m");}
 void reset(){printf("\033[0m");}
 
 void End();
-void HighScoreLoad(int x);
-void HighScoreSave(int x,int winner);
-void Redo(int r,int c,char a[][c],int RU[]);
-void Undo(int r,int c,char a[][c],int RU[]);
-void load(int r,int c,char a[][c]);
-void save(int r,int c,char a[][c],int RU[]);
-int AI(int r,int c,char a[][c]);
-int full(int r,int c,char a[][c]);
-void count(int r,int c,char a[][c]);
-int countFours(char x,int r,int c,char a[][c]);
-void bar(int c);
-void columnIndex(int c);
-void board(int r,int c,char a[][c]);
-void Rmve(char chip,int c,char a[][c],int e);
-void fill(char chip ,int r,int c,char a[][c],int q);
-int choose(int c,char a[][c]);
-void Menu(int r,int c,char a[][c],int RU[]);
-void gameHuman(int r,int c,char a[][c]);
-void gameComputer(int r,int c,char a[][c]);
-void initiate(int r,int c,char a[][c]);
-void start(int r,int c,char a[][c]);
-void MainMenu(int r,int c,char a[][c]);
+void HighScoreLoad();
+void HighScoreSave(int winner);
+void Redo(char a[][prmtrs.c],int RU[]);
+void Undo(char a[][prmtrs.c],int RU[]);
+void load(char a[][prmtrs.c]);
+void save(char a[][prmtrs.c],int RU[]);
+int AI(char a[][prmtrs.c],char one,char two);
+int full(char a[][prmtrs.c]);
+void countMovs(char a[][prmtrs.c]);
+int countFours(char chip,char a[][prmtrs.c]);
+void bar();
+void columnIndex();
+void board(char a[][prmtrs.c]);
+void Rmve(char chip,char a[][prmtrs.c],int e);
+void fill(char chip ,char a[][prmtrs.c],int q);
+int choose(char a[][prmtrs.c]);
+void Menu(char a[][prmtrs.c],int RU[]);
+void gameHuman(char a[][prmtrs.c]);
+void gameComputer(char a[][prmtrs.c]);
+void initiate(char a[][prmtrs.c]);
+void start(char a[][prmtrs.c]);
+void MainMenu(char a[][prmtrs.c]);
 //════════════════════════════════════════════════════════════════════════
 
 int main(){
     int parameters[3];
     read_xml(parameters);
-    r=parameters[0];
-    c=parameters[1];
-    x=parameters[2];
-    char a[r][c];
+    prmtrs.r=parameters[0];
+    prmtrs.c=parameters[1];
+    prmtrs.x=parameters[2];
+    char a[prmtrs.r][prmtrs.c];
     for(int i=0;i<13;i++)
         Empty[i]=' ';
     player1.colour=1;player1.chip='X';player1.turns=0;player1.score=0;
     player2.colour=2;player2.chip='O';player2.turns=0;player2.score=0;
-    initiate(r,c,a);
-    MainMenu(r,c,a);
+    initiate(a);
+    MainMenu(a);
 }
 
 //════════════════════════════════════════════════════════════════════════
 
-void MainMenu(int r,int c,char a[][c]){
+void MainMenu(char a[][prmtrs.c]){
     char key;
     system("cls");
     printf("Main Menu\nPlease,stick to the Given inputs!\nS:Start\nL:Load\nH:HighScores\nQ:Exit\n");
     key=getch();
-    switch(key){
-        case'S':
-        case's':
-            start(r,c,a);
-            break;
-        case'L':
-        case'l':
-            initiate(r,c,a);
-            load(r,c,a);
-            count(r,c,a);
-            player1.score=countFours(player1.chip,r,c,a);
-            player2.score=countFours(player2.chip,r,c,a);
-            if(gameMode=='h')
-                gameHuman(r,c,a);
-            if(gameMode=='c')
-                gameComputer(r,c,a);
-            break;
-         case'H':
-         case'h':
-            HighScoreLoad(x);
-            MainMenu(r,c,a);
-            break;
-        case'Q':
-        case'q':
-            exit(0);
-            break;
-        default:
-            MainMenu(r,c,a);
+    if(key == 'L' || key == 'l'){
+        initiate(a);
+        load(a);
+        char b[prmtrs.r][prmtrs.c];
+        for(int i=0;i<prmtrs.r;i++)
+            for(int j=0;j<prmtrs.c;j++)
+                b[i][j]=a[i][j];
+        countMovs(b);
+        player1.score=countFours(player1.chip,b);
+        player2.score=countFours(player2.chip,b);
+        if(gameMode=='h')
+            gameHuman(b);
+        if(gameMode=='c')
+            gameComputer(b);
+    }
+    else{
+        switch(key){
+            case'S':
+            case's':
+                start(a);
+                break;
+            case'H':
+            case'h':
+                HighScoreLoad();
+                MainMenu(a);
+                break;
+            case'Q':
+            case'q':
+                exit(0);
+                break;
+            default:
+                MainMenu(a);
+        }
+    }
 }
-}
-void start(int r,int c,char a[][c]){
+void start(char a[][prmtrs.c]){
     char key;
     system("cls");
-    initiate(r,c,a);
-    count(r,c,a);
+    initiate(a);
+    countMovs(a);
+    player1.score=0;
+    player2.score=0;
     printf("Select GameMode:\nH:Player Vs Player\nC:Player Vs Computer\n");
     key=getch();
     switch(key){
         case 'H':
         case 'h':
-            gameHuman(r,c,a);
+            gameHuman(a);
             break;
         case 'C':
         case 'c':
             system("cls");
-            gameComputer(r,c,a);
+            gameComputer(a);
             break;
         default:
-            start(r,c,a);}
+            start(a);}
 }
-void initiate(int r,int c,char a[][c]){
-    for(int i=0;i<r;i++)
-        for(int j=0;j<c;j++)
+void initiate(char a[][prmtrs.c]){
+    for(int i=0;i<prmtrs.r;i++)
+        for(int j=0;j<prmtrs.c;j++)
             a[i][j]=' ';
 }
-void gameComputer(int r,int c,char a[][c]){
+void gameComputer(char a[][prmtrs.c]){
     timr=time(NULL);
-    int RU[c*r];
-    int e=c/2;
+    int RU[prmtrs.c*prmtrs.r];
+    for(int i=0;i<prmtrs.c*prmtrs.r;i++)
+        RU[i]=-1;
+    int e;
     gameMode='c';
-    board(r,c,a);
-    while(full(r,c,a)==0){
+    board(a);
+    while(full(a)==0){
         printf("\033[0m(~):Menu\n\033[1;31mYour Score:%d\t\033[0;33mComputer Score:%d\n\033[1;31mYour Moves:%d\t\033[0;33mComputer Moves:%d\n",player1.score,player2.score,player1.turns,player2.turns);
         if(player1.turns<=player2.turns){
             printf("\033[1;31mTime~%02d:%02d\n",(int)(time(NULL)-timr)/60,(int)(time(NULL)-timr)%60);
             printf("\033[1;31mChoose A Bin:");
-            e=choose(c,a);
+            e=choose(a);
             if(e==-13){
-                    Menu(r,c,a,RU);
-                    board(r,c,a);
+                    Menu(a,RU);
+                    board(a);
             }
             else{
                 RU[player1.turns+player2.turns]=e;
-                for(int i=player1.turns+player2.turns+1;i<r*c;i++)
+                for(int i=player1.turns+player2.turns+1;i<prmtrs.r*prmtrs.c;i++)
                     RU[i]=-1;
-                fill(player1.chip,r,c,a,e);
-                player1.score=countFours(player1.chip,r,c,a);
+                fill(player1.chip,a,e);
+                player1.score=countFours(player1.chip,a);
                 player1.turns++;
             }
         }
-        if(player1.turns>player2.turns&&full(r,c,a)==0){
-                e=AI(r,c,a);
+        if(player1.turns>player2.turns&&full(a)==0){
+                e=AI(a,'X','O');
                 RU[player1.turns+player2.turns]=e;
-                for(int i=player1.turns+player2.turns+1;i<r*c;i++)
+                for(int i=player1.turns+player2.turns+1;i<prmtrs.r*prmtrs.c;i++)
                     RU[i]=-1;
-                fill(player2.chip,r,c,a,e);
+                fill(player2.chip,a,e);
                 blue();
-                board(r,c,a);
-                player2.score=countFours(player2.chip,r,c,a);
+                board(a);
+                player2.score=countFours(player2.chip,a);
                 player2.turns++;
         }
     }
     End();
 }
-void gameHuman(int r,int c,char a[][c]){
+void gameHuman(char a[][prmtrs.c]){
     timr=time(NULL);
-    int RU[r*c];
+    int RU[prmtrs.r*prmtrs.c];
+    for(int i=0;i<prmtrs.c*prmtrs.r;i++)
+        RU[i]=-1;
     int e;
-    board(r,c,a);
+    board(a);
     gameMode='h';
-    while(full(r,c,a)==0){
+    while(full(a)==0){
             if(player1.turns<=player2.turns){
                 red();
                 printf("\033[0m(~):Menu\n\033[1;31mPlayer 1 Score:%d\t\033[0;33mPlayer 2 Score:%d\n\033[1;31mPlayer 1 Moves:%d\t\033[0;33mPlayer 2 Moves:%d\n",player1.score,player2.score,player1.turns,player2.turns);
                 printf("\033[1;31mTime~%02d:%02d\n",(int)(time(NULL)-timr)/60,(int)(time(NULL)-timr)%60);
+                printf("BestMove for X is Column {%d}\n",AI(a,'O','X'));
                 printf("Player 1 Can Choose A Bin:");
-                e=choose(c,a);
+                e=choose(a);
                 if(e==-13){
-                    Menu(r,c,a,RU);
-                    board(r,c,a);
+                    Menu(a,RU);
+                    board(a);
                 }
                 else{
                     RU[player1.turns+player2.turns]=e;
-                    for(int i=player1.turns+player2.turns+1;i<r*c;i++)
+                    for(int i=player1.turns+player2.turns+1;i<prmtrs.r*prmtrs.c;i++)
                         RU[i]=-1;
-                    fill(player1.chip,r,c,a,e);
+                    fill(player1.chip,a,e);
                     blue();
-                    board(r,c,a);
-                    player1.score=countFours(player1.chip,r,c,a);
+                    board(a);
+                    player1.score=countFours(player1.chip,a);
                     player1.turns++;
                 }
             }
-            if(player1.turns>player2.turns&&full(r,c,a)==0){
+            if(player1.turns>player2.turns&&full(a)==0){
                 yellow();
-               printf("\033[0m(~):Menu\n\033[0;33mPlayer 2 Score:%d\t\033[1;31mPlayer 1 Score:%d\n\033[0;33mPlayer 2 Moves:%d\t\033[1;31mPlayer 1 Moves:%d\n",player2.score,player1.score,player2.turns,player1.turns);
+                printf("\033[0m(~):Menu\n\033[0;33mPlayer 2 Score:%d\t\033[1;31mPlayer 1 Score:%d\n\033[0;33mPlayer 2 Moves:%d\t\033[1;31mPlayer 1 Moves:%d\n",player2.score,player1.score,player2.turns,player1.turns);
                 printf("\033[0;33mTime~%02d:%02d\n",(int)(time(NULL)-timr)/60,(int)(time(NULL)-timr)%60);
+                printf("BestMove for O is Column {%d}\n",AI(a,'X','O'));
                 printf("Player 2 Can Choose A Bin:");
-                e=choose(c,a);
+                e=choose(a);
                 if(e==-13){
-                    Menu(r,c,a,RU);
-                    board(r,c,a);}
+                    Menu(a,RU);
+                    board(a);}
                 else{
                     RU[player1.turns+player2.turns]=e;
-                    for(int i=player1.turns+player2.turns+1;i<r*c;i++)
+                    for(int i=player1.turns+player2.turns+1;i<prmtrs.r*prmtrs.c;i++)
                         RU[i]=-1;
-                    fill(player2.chip,r,c,a,e);
+                    fill(player2.chip,a,e);
                     blue();
-                    board(r,c,a);
-                    player2.score=countFours(player2.chip,r,c,a);
+                    board(a);
+                    player2.score=countFours(player2.chip,a);
                     player2.turns++;
                 }
             }
     }
     End();
 }
-void Menu(int r,int c,char a[][c],int RU[]){
+void Menu(char a[][prmtrs.c],int RU[]){
     char key;
     system("cls");
-    board(r,c,a);
+    board(a);
     reset();
     printf("Menu\nPlease,stick to the Given inputs!\nC:Close\nA:Animation\nS:Save\nU:undo\nR:Redo\nQ:Exit\n");
     key=getch();
@@ -240,18 +258,18 @@ void Menu(int r,int c,char a[][c],int RU[]){
             break;
         case'S':
         case's':
-            save(r,c,a,RU);
-            Menu(r,c,a,RU);
+            save(a,RU);
+            Menu(a,RU);
             break;
         case'U':
         case'u':
-            Undo(r,c,a,RU);
-            Menu(r,c,a,RU);
+            Undo(a,RU);
+            Menu(a,RU);
             break;
         case'R':
         case'r':
-            Redo(r,c,a,RU);
-            Menu(r,c,a,RU);
+            Redo(a,RU);
+            Menu(a,RU);
             break;
         case'A':
         case'a':
@@ -264,18 +282,18 @@ void Menu(int r,int c,char a[][c],int RU[]){
             break;
         case'Q':
         case'q':
-            MainMenu(r,c,a);
+            main();
             break;
         default:
-            player1.score=countFours(player1.chip,r,c,a);
-            player2.score=countFours(player2.chip,r,c,a);
-            Menu(r,c,a,RU);
+            player1.score=countFours(player1.chip,a);
+            player2.score=countFours(player2.chip,a);
+            Menu(a,RU);
     }
 }
-int choose(int c,char a[][c]){
+int choose(char a[][prmtrs.c]){
     int i;
     char numberCols[9];
-    if(c<=58){
+    if(prmtrs.c<=58){
         i=getch()-65;
         if(i==61)
             i=-13;
@@ -286,15 +304,15 @@ int choose(int c,char a[][c]){
         if(numberCols[0]=='~')
             i=-13;
     }
-    if((a[0][i]==' ') && (i<c) && (i>=0) || (i==-13)){
+    if((a[0][i]==' ') && (i<prmtrs.c) && (i>=0) || (i==-13)){
         return i;
     }
     else{
         printf("\nInValid Cloumn!");
-        choose(c,a);
+        choose(a);
     }
 }
-void fill(char chip ,int r,int c,char a[][c],int q){
+void fill(char chip ,char a[][prmtrs.c],int q){
     if(q>=0){
         int i;
         if(Animation==1){
@@ -303,9 +321,9 @@ void fill(char chip ,int r,int c,char a[][c],int q){
             }
             else{
                 a[0][q]=chip;
-                for(i=1;i<r;i++){
+                for(i=1;i<prmtrs.r;i++){
                     if(a[i][q]==' '){
-                        board(r,c,a);
+                        board(a);
                         a[i-1][q]=' ';
                         Beep(200,75);
                         a[i][q]=chip;
@@ -317,7 +335,7 @@ void fill(char chip ,int r,int c,char a[][c],int q){
         Beep(400,50);
         }
         else{
-            for(i=r-1;i>=0;i--){
+            for(i=prmtrs.r-1;i>=0;i--){
                 if(a[i][q]==' '){
                     a[i][q]=chip;
                     break;
@@ -326,15 +344,15 @@ void fill(char chip ,int r,int c,char a[][c],int q){
         }
     }
 }
-void Rmve(char chip,int c,char a[][c],int e){
+void Rmve(char chip,char a[][prmtrs.c],int e){
     if(e>=0){
         if(Animation==1){
-            for(int i=0;i<r;i++){
+            for(int i=0;i<prmtrs.r;i++){
                 if(a[i][e]!=' '){
                     for(int j=i;j>0;j--){
                         a[j][e]=' ';
                         a[j-1][e]=chip;
-                        board(r,c,a);
+                        board(a);
                         Beep(200,75);
                     }
                     a[0][e]=' ';
@@ -346,7 +364,7 @@ void Rmve(char chip,int c,char a[][c],int e){
             }
         }
         else{
-            for(int i=0;i<r;i++){
+            for(int i=0;i<prmtrs.r;i++){
                 if(a[i][e]!=' '){
                     a[i][e]=' ';
                     break;
@@ -355,13 +373,13 @@ void Rmve(char chip,int c,char a[][c],int e){
         }
     }
 }
-void board(int r,int c,char a[][c]){
+void board(char a[][prmtrs.c]){
     system("cls");
     blue();
-    columnIndex(c);
-    bar(c);
-    for(int i=0;i<r;i++){
-        for(int j=0;j<c;j++){
+    columnIndex();
+    bar();
+    for(int i=0;i<prmtrs.r;i++){
+        for(int j=0;j<prmtrs.c;j++){
             blue();
             printf(" %c ",186);
             if (a[i][j]=='X'){
@@ -374,74 +392,74 @@ void board(int r,int c,char a[][c]){
             }
         blue();
         printf(" %c\n",186);
-        bar(c);
+        bar();
     }
 }
-void columnIndex(int c){
-    if(c<59){
+void columnIndex(){
+    if(prmtrs.c<59){
         printf("  ");
-        for(int i=65;(i<65+c)&&(i<=122);i++)
+        for(int i=65;(i<65+prmtrs.c)&&(i<=122);i++)
             printf(" %c  ",i);
         printf("\n");
     }
     else{
         printf("  ");
-        for(int i=1;i<=c;i++)
+        for(int i=1;i<=prmtrs.c;i++)
             printf("%03d ",i);
         printf("\n");
     }
 }
-void bar(int c){
+void bar(){
         printf(" ");
-        for(int i=0;i<c;i++)
+        for(int i=0;i<prmtrs.c;i++)
             printf("%c%c%c%c",206,205,205,205);
         printf("%c",206);
         printf("\n");
 }
-int countFours(char x,int r,int c,char a[][c]){
+int countFours(char chip,char a[][prmtrs.c]){
     int count=0,f,i,j,k;
-    for(i=0;i<r;i++){
-        for(j=0;j<(c-3);j++){
+    for(i=0;i<prmtrs.r;i++){
+        for(j=0;j<(prmtrs.c-3);j++){
             f=0;
             for(k=j;k<(j+4);k++)
-                if(a[i][k]==x)
+                if(a[i][k]==chip)
                     f++;
             if(f==4)count++;
         }
     }
-    for(j=0;j<c;j++){
-        for(i=0;i<(r-3);i++){
+    for(j=0;j<prmtrs.c;j++){
+        for(i=0;i<(prmtrs.r-3);i++){
             f=0;
             for(k=i;k<(i+4);k++)
-                if(a[k][j]==x)
+                if(a[k][j]==chip)
                     f++;
             if(f==4)count++;
         }
     }
-    for(i=0;i<r-3;i++){
-        for(j=0;j<c-3;j++){
+    for(i=0;i<prmtrs.r-3;i++){
+        for(j=0;j<prmtrs.c-3;j++){
             f=0;
             for(k=0;k<4;k++)
-                if(a[i+k][j+k]==x)
+                if(a[i+k][j+k]==chip)
                 f++;
             if(f==4)count++;
         }
     }
-    for(i=0;i<r-3;i++){
-        for(j=3;j<c;j++){
+    for(i=0;i<prmtrs.r-3;i++){
+        for(j=3;j<prmtrs.c;j++){
             f=0;
             for(k=0;k<4;k++)
-                if(a[i+k][j-k]==x)
+                if(a[i+k][j-k]==chip)
                 f++;
             if(f==4)count++;
         }
     }
     return count;
 }
-void count(int r,int c,char a[][c]){
+void countMovs(char a[][prmtrs.c]){
     int c1=0,c2=0;
-    for(int i=0;i<r;i++){
-        for(int j=0;j<c;j++){
+    for(int i=0;i<prmtrs.r;i++){
+        for(int j=0;j<prmtrs.c;j++){
                 if(a[i][j]=='X')c1++;
                 else if(a[i][j]=='O')c2++;
         }
@@ -449,43 +467,43 @@ void count(int r,int c,char a[][c]){
     player1.turns=c1;
     player2.turns=c2;
 }
-int full(int r,int c,char a[][c]){
-    for(int i=0;i<r;i++)
-        for(int j=0;j<c;j++)
+int full(char a[][prmtrs.c]){
+    for(int i=0;i<prmtrs.r;i++)
+        for(int j=0;j<prmtrs.c;j++)
             if(a[i][j]==' ')
                 return 0;
     return 1;
 }
-int AI(int r,int c, char a[][c]){
+int AI(char a[][prmtrs.c],char one,char two){
     int animationState=Animation,tempScore,tempColumn,tempdiff,Chosen=0;
     Animation=0;
-    char Test[r][c];
-    BestChoice choices[c];
-    int difference[c],difference1[c];
-    for(int i=0;i<r;i++)
-        for(int j=0;j<c;j++)
+    char Test[prmtrs.r][prmtrs.c];
+    BestChoice choices[prmtrs.c];
+    int difference[prmtrs.c],difference1[prmtrs.c];
+    for(int i=0;i<prmtrs.r;i++)
+        for(int j=0;j<prmtrs.c;j++)
             Test[i][j]=a[i][j];
-    for(int i=0;i<c;i++){
-        choices[i].choiceScore=-(c*r);
-        difference[i]=(c*r);
-        difference1[i]=-(c*r);
+    for(int i=0;i<prmtrs.c;i++){
+        choices[i].choiceScore=-(prmtrs.c*prmtrs.r);
+        difference[i]=(prmtrs.c*prmtrs.r);
+        difference1[i]=-(prmtrs.c*prmtrs.r);
     }
-    for(int i=0;i<c;i++){
+    for(int i=0;i<prmtrs.c;i++){
             choices[i].sampleColumn=i;
             if(Test[0][i]==' '){
-                fill(player2.chip,r,c,Test,i);
-                for(int j=0;j<c;j++){
+                fill(two,Test,i);
+                for(int j=0;j<prmtrs.c;j++){
                         if(Test[0][j]==' '){
-                            fill(player1.chip,r,c,Test,j);
-                            for(int k=0;k<c;k++){
+                            fill(one,Test,j);
+                            for(int k=0;k<prmtrs.c;k++){
                                 if(Test[0][k]==' '){
-                                    fill(player2.chip,r,c,Test,k);
-                                    difference1[k]=countFours(player2.chip,r,c,Test)-countFours(player1.chip,r,c,Test);
-                                    Rmve(player2.chip,c,Test,k);
+                                    fill(two,Test,k);
+                                    difference1[k]=countFours(two,Test)-countFours(one,Test);
+                                    Rmve(two,Test,k);
                                 }
                             }
-                            for(int ii=0;ii<c;ii++){
-                                for(int jj=ii+1;jj<c;jj++){
+                            for(int ii=0;ii<prmtrs.c;ii++){
+                                for(int jj=ii+1;jj<prmtrs.c;jj++){
                                     if(difference1[ii]<difference1[jj]){
                                         tempdiff=difference1[ii];
                                         difference1[ii]=difference1[jj];
@@ -493,12 +511,12 @@ int AI(int r,int c, char a[][c]){
                                     }
                                 }
                             }
-                            difference[j]=countFours(player2.chip,r,c,Test)-countFours(player1.chip,r,c,Test);
-                            Rmve(player1.chip,c,Test,j);
+                            difference[j]=countFours(two,Test)-countFours(one,Test);
+                            Rmve(one,Test,j);
                         }
                 }
-                for(int ii=0;ii<c;ii++){
-                    for(int jj=ii+1;jj<c;jj++){
+                for(int ii=0;ii<prmtrs.c;ii++){
+                    for(int jj=ii+1;jj<prmtrs.c;jj++){
                         if(difference[ii]<difference[jj]){
                             tempdiff=difference[ii];
                             difference[ii]=difference[jj];
@@ -506,12 +524,12 @@ int AI(int r,int c, char a[][c]){
                         }
                     }
                 }
-                choices[i].choiceScore=difference[c-1]+difference1[0];
-                Rmve(player2.chip,c,Test,i);
+                choices[i].choiceScore=difference[prmtrs.c-1]+difference1[0];
+                Rmve(two,Test,i);
             }
     }
-    for(int i=0;i<c;i++){
-        for(int j=i+1;j<c;j++){
+    for(int i=0;i<prmtrs.c;i++){
+        for(int j=i+1;j<prmtrs.c;j++){
             if(choices[i].choiceScore<choices[j].choiceScore){
                 tempScore=choices[i].choiceScore;
                 tempColumn=choices[i].sampleColumn;
@@ -522,12 +540,15 @@ int AI(int r,int c, char a[][c]){
             }
         }
     }
+//    for(int i=0;i<prmtrs.c;i++)
+//        printf("(%d %d),",choices[i].sampleColumn,choices[i].choiceScore);
+//    getch();
     Animation=animationState;
     while(a[0][choices[Chosen].sampleColumn]!=' ')
         Chosen++;
     return choices[Chosen].sampleColumn;
 }
-void save(int r,int c,char a[][c],int RU[]){
+void save(char a[][prmtrs.c],int RU[]){
     system("cls");
     char key;
     FILE *s=NULL;
@@ -548,19 +569,20 @@ void save(int r,int c,char a[][c],int RU[]){
             break;
         case 'D':
         case 'd':
-            Menu(r,c,a,RU);
+            Menu(a,RU);
         default:
-            save(r,c,a,RU);
+            save(a,RU);
         }
     if(s==NULL)
         printf("something went wrong");
-    for(int i=0; i<r; i++)
-        for(int j=0; j<c; j++)
+    fwrite(&prmtrs,sizeof(rcx),1,s);
+    for(int i=0; i<prmtrs.r; i++)
+        for(int j=0; j<prmtrs.c; j++)
             fwrite(&a[i][j],sizeof(char),1,s);
     fwrite(&gameMode,sizeof(int),1,s);
     fclose(s);
 }
-void load(int r,int c,char a[][c]){
+void load(char a[][prmtrs.c]){
     system("cls");
     int key;
     FILE *s=NULL;
@@ -581,68 +603,69 @@ void load(int r,int c,char a[][c]){
             break;
         case 'D':
         case 'd':
-            MainMenu(r,c,a);
+            MainMenu(a);
             break;
         default:
-            load(r,c,a);
+            load(a);
         }
     if(s==NULL)
-        load(r,c,a);
-    for(int i=0; i<r; i++)
-        for(int j=0; j<c; j++)
+        load(a);
+    fread(&prmtrs,sizeof(rcx),1,s);
+    for(int i=0; i<prmtrs.r; i++)
+        for(int j=0; j<prmtrs.c; j++)
             fread(&a[i][j],sizeof(char),1,s);
     fread(&gameMode,sizeof(char),1,s);
     fclose(s);
 }
-void Undo(int r,int c,char a[][c],int RU[]){
-    if(player1.turns>0){
+void Undo(char a[][prmtrs.c],int RU[]){
+    if(player1.turns>0&&RU[player1.turns+player2.turns-1]!=-1){
         if(gameMode=='h'){
                 if(player1.turns==player2.turns){
                     player2.turns--;
-                    Rmve(player2.chip,c,a,RU[player1.turns+player2.turns]);
+                    Rmve(player2.chip,a,RU[player1.turns+player2.turns]);
                 }
                 else{
                     player1.turns--;
-                    Rmve(player1.chip,c,a,RU[player1.turns+player2.turns]);
+                    Rmve(player1.chip,a,RU[player1.turns+player2.turns]);
                 }
         }
         else if(gameMode=='c'){
                 player1.turns--;
-                Rmve(player2.chip,c,a,RU[player1.turns+player2.turns]);
+                Rmve(player2.chip,a,RU[player1.turns+player2.turns]);
                 player2.turns--;
-                Rmve(player1.chip,c,a,RU[player1.turns+player2.turns]);
+                Rmve(player1.chip,a,RU[player1.turns+player2.turns]);
         }
     }
 }
-void Redo(int r,int c,char a[][c],int RU[]){
+void Redo(char a[][prmtrs.c],int RU[]){
     if(RU[player1.turns+player2.turns]!=-1){
         if(gameMode=='h'){
                 if(player1.turns>player2.turns){
-                    fill(player2.chip,r,c,a,RU[player1.turns+player2.turns]);
+                    fill(player2.chip,a,RU[player1.turns+player2.turns]);
                     player2.turns++;
                 }
                 else{
-                    fill(player1.chip,r,c,a,RU[player1.turns+player2.turns]);
+                    fill(player1.chip,a,RU[player1.turns+player2.turns]);
                     player1.turns++;
                 }
         }
         else if(gameMode=='c'){
-                fill(player1.chip,r,c,a,RU[player1.turns+player2.turns]);
+                fill(player1.chip,a,RU[player1.turns+player2.turns]);
                 player1.turns++;
-                fill(player2.chip,r,c,a,RU[player1.turns+player2.turns]);
+                fill(player2.chip,a,RU[player1.turns+player2.turns]);
                 player2.turns++;
         }
     }
 }
-void HighScoreSave(int x,int winner){
-    High p[x],winnerData;
-    for(int i=0;i<x;i++){
+void HighScoreSave(int winner){
+    HighScr p[prmtrs.x],winnerData;
+    for(int i=0;i<prmtrs.x;i++){
         strcpy(p[i].name,Empty);
         p[i].score=0;
     }
     system("cls");
     reset();
-    printf("HighScores\nRank| Score| Name\n");
+    printf("HighScores\nRank  . Score| Name\n");
     int Found=0;
     if(winner==1){
         winnerData.score=player1.score;
@@ -655,16 +678,16 @@ void HighScoreSave(int x,int winner){
     FILE *s=NULL;
     s=fopen("HighScores.dat","rb");
     if(s!=NULL){
-        fread(p,sizeof(High),x,s);
+        fread(p,sizeof(HighScr),prmtrs.x,s);
     }
     else{
-        strcpy(p[1].name,winnerData.name);
-        p[1].score=winnerData.score;
+        strcpy(p[0].name,winnerData.name);
+        p[0].score=winnerData.score;
     }
     fclose(s);
     FILE *f=NULL;
     f=fopen("HighScores.dat","wb");
-    for(int i=0;i<x;i++){
+    for(int i=0;i<prmtrs.x;i++){
         if(strcasecmp(p[i].name,winnerData.name)==0){
             Found=1;
             if(p[i].score<winnerData.score){
@@ -674,15 +697,15 @@ void HighScoreSave(int x,int winner){
         }
     }
     if(Found==0){
-            if(winnerData.score>p[x-1].score){
-                p[x-1].score=winnerData.score;
-                strcpy(p[x-1].name,winnerData.name);
+            if(winnerData.score>p[prmtrs.x-1].score){
+                p[prmtrs.x-1].score=winnerData.score;
+                strcpy(p[prmtrs.x-1].name,winnerData.name);
             }
     }
     char tempName[13];
     int tempScore;
-    for(int i=0;i<x;i++){
-            for(int j=i+1;j<x;j++){
+    for(int i=0;i<prmtrs.x;i++){
+            for(int j=i+1;j<prmtrs.x;j++){
                     if(p[i].score<p[j].score){
                         tempScore=p[i].score;
                         strcpy(tempName,p[i].name);
@@ -693,18 +716,22 @@ void HighScoreSave(int x,int winner){
                     }
             }
     }
-    fwrite(p,sizeof(High),x,f);
+    fwrite(p,sizeof(HighScr),prmtrs.x,f);
     fclose(f);
-    for(int i=0;i<x;i++){
-        printf("%d   . %05d|%s\n",i+1,p[i].score,p[i].name);
+    for(int i=0;i<prmtrs.x;i++){
+        printf("%02d  . %05d|%s\n",i+1,p[i].score,p[i].name);
     }
     sleep(1);
 }
-void HighScoreLoad(int x){
-    High p[x],winnerData;
+void HighScoreLoad(){
+    HighScr p[prmtrs.x],winnerData;
+    for(int i=0;i<prmtrs.x;i++){
+        strcpy(p[i].name,Empty);
+        p[i].score=0;
+    }
     char Back;
     system("cls");
-    printf("HighScores\nRank. Score| Name\n");
+    printf("HighScores\nRank  . Score| Name\n");
     FILE *s=NULL;
     s=fopen("HighScores.dat","rb");
     if(s==NULL){
@@ -712,14 +739,14 @@ void HighScoreLoad(int x){
         getch();
     }
     else{
-        fread(p,sizeof(High),x,s);
-        for(int i=0;i<x;i++){
-            printf("%d   . %05d|%s\n",i+1,p[i].score,p[i].name);
+        fread(p,sizeof(HighScr),prmtrs.x,s);
+        for(int i=0;i<prmtrs.x;i++){
+            printf("%02d    . %05d|%s\n",i+1,p[i].score,p[i].name);
             }
         printf("(b)Back:");
         Back=getch();
         if(Back!='b' && Back!='B')
-            HighScoreLoad(x);
+            HighScoreLoad(prmtrs.x);
         fclose(s);
     }
 }
@@ -729,20 +756,20 @@ void End(){
     if(player1.score>player2.score){
         printf("\033[1;31mPlayer 1 Wins!\nName Of Our Champ:");
         scanf("%s",player1.name);
-        HighScoreSave(x,1);
+        HighScoreSave(1);
     }
     else if(player1.score<player2.score&&gameMode=='h'){
         printf("\033[0;33mPlayer 2 Wins!\nName Of Our Champ:");
         scanf("%s",player2.name);
-        HighScoreSave(x,2);
+        HighScoreSave(2);
     }
     else if(player1.score==player2.score&&gameMode=='h'){
         printf("\033[0mIt's A Draw\nName of Player1:");
         scanf("%s",player1.name);
-        HighScoreSave(x,1);
+        HighScoreSave(1);
         printf("\033[0m\nName of Player2:");
         scanf("%s",player2.name);
-        HighScoreSave(x,2);
+        HighScoreSave(2);
     }
     else
         printf("\033[0mCouldn't Defeat me!,Bye%c\n",259);
@@ -753,3 +780,4 @@ void End(){
         exit(0);
     main();
 }
+
