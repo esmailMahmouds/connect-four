@@ -44,7 +44,7 @@ void read_xml(int parameters[])
     /** check for configration tag**/
     index1=get_start("<Configurations>",length,text);
     index2=get_end("</Configurations>",length,text);
-    if(index1 == -1 || index2 ==-1)
+    if(index1 == -1 || index2 ==-1 || index1>index2)
     {
         error++;
         printf("File is corrupted...");
@@ -63,7 +63,7 @@ void read_xml(int parameters[])
         {
             index1=get_start(list[i],length,config);
             index2=get_end(list[i+1],length,config);
-            if(index1 ==-1 || index2 ==-1)
+            if(index1 ==-1 || index2 ==-1 || index1>index2)
             {
                    error++;
                    printf("File is corrupted...");
