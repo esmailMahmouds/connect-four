@@ -33,14 +33,15 @@ typedef struct{
 playerData player1,player2;
 char Empty[13];
 long long timr;
-int Animation=1;
+int Animation=0;
+int firstTime=0;
 
 void blue(){printf("\033[0;34m");}
 void red(){printf("\033[1;31m");}
 void yellow(){printf("\033[0;33m");}
 void reset(){printf("\033[0m");}
 
-void End(char a[][prmtrs.c]);
+void End();
 void HighScoreLoad();
 void HighScoreSave(int winner);
 void Redo(char a[][prmtrs.c],int RU[]);
@@ -67,10 +68,16 @@ void MainMenu(char a[][prmtrs.c]);
 
 int main(){
     int parameters[3];
-    read_xml(parameters);
-    prmtrsHold.r=prmtrs.r=parameters[0];
-    prmtrsHold.c=prmtrs.c=parameters[1];
-    prmtrsHold.x=prmtrs.x=parameters[2];
+    if(firstTime==0){
+        read_xml(parameters);
+        prmtrsHold.r=prmtrs.r=parameters[0];
+        prmtrsHold.c=prmtrs.c=parameters[1];
+        prmtrsHold.x=prmtrs.x=parameters[2];
+        firstTime++;
+    }
+    prmtrs.x=prmtrsHold.x;
+    prmtrs.c=prmtrsHold.c;
+    prmtrs.r=prmtrsHold.r;
     char a[prmtrs.r][prmtrs.c];
     for(int i=0;i<13;i++)
         Empty[i]=' ';
@@ -83,46 +90,30 @@ int main(){
 //════════════════════════════════════════════════════════════════════════
 
 void MainMenu(char a[][prmtrs.c]){
-    prmtrs.r=prmtrsHold.r;
-    prmtrs.c=prmtrsHold.c;
-    prmtrs.x=prmtrsHold.x;
     char key;
     system("cls");
     printf("Main Menu\nPlease,stick to the Given inputs!\nS:Start\nL:Load\nH:HighScores\nQ:Exit\n");
     key=getch();
-    if(key == 'L' || key == 'l'){
-        initiate(a);
-        load(a);
-        char b[prmtrs.r][prmtrs.c];
-        for(int i=0;i<prmtrs.r;i++)
-            for(int j=0;j<prmtrs.c;j++)
-                b[i][j]=a[i][j];/*Making A second Array to accept loads of different dimensions*/
-        countMovs(b);
-        player1.score=countFours(player1.chip,b);
-        player2.score=countFours(player2.chip,b);
-        if(gameMode=='h')
-            gameHuman(b);
-        if(gameMode=='c')
-            gameComputer(b);
-    }
-    else{
-        switch(key){
-            case'S':
-            case's':
-                start(a);
-                break;
-            case'H':
-            case'h':
-                HighScoreLoad();
-                MainMenu(a);
-                break;
-            case'Q':
-            case'q':
-                exit(0);
-                break;
-            default:
-                MainMenu(a);
-        }
+    switch(key){
+        case'S':
+        case's':
+            start(a);
+            break;
+        case'L':
+        case'l':
+            load(a);
+            break;
+        case'H':
+        case'h':
+            HighScoreLoad();
+            MainMenu(a);
+            break;
+        case'Q':
+        case'q':
+            exit(0);
+            break;
+        default:
+            MainMenu(a);
     }
 }
 void start(char a[][prmtrs.c]){
@@ -290,7 +281,7 @@ void Menu(char a[][prmtrs.c],int RU[]){
             break;
         case'Q':
         case'q':
-            MainMenu(a);
+            main();
             break;
         default:
             player1.score=countFours(player1.chip,a);
@@ -623,11 +614,20 @@ void load(char a[][prmtrs.c]){
     if(s==NULL)
         load(a);
     fread(&prmtrs,sizeof(rcx),1,s);
+    char b[prmtrs.r][prmtrs.c];
+    initiate(b);
     for(int i=0; i<prmtrs.r; i++)
         for(int j=0; j<prmtrs.c; j++)
-            fread(&a[i][j],sizeof(char),1,s);
+            fread(&b[i][j],sizeof(char),1,s);
     fread(&gameMode,sizeof(char),1,s);
     fclose(s);
+    countMovs(b);
+    player1.score=countFours(player1.chip,b);
+    player2.score=countFours(player2.chip,b);
+    if(gameMode=='h')
+        gameHuman(b);
+    if(gameMode=='c')
+        gameComputer(b);
 }
 void Undo(char a[][prmtrs.c],int RU[]){
     if(player1.turns>0&&RU[player1.turns+player2.turns-1]!=-1){
@@ -761,7 +761,7 @@ void HighScoreLoad(){
         fclose(s);
     }
 }
-void End(char a[][prmtrs.c]){
+void End(){
     system("cls");
     int winner;
     if(player1.score>player2.score){
@@ -789,5 +789,5 @@ void End(char a[][prmtrs.c]){
     option = getch();
     if(option=='q'||option=='Q')
         exit(0);
-    MainMenu(a);
+    main();
 }
