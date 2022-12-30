@@ -41,7 +41,6 @@ void read_xml(int parameters[])
         text[i]=fgetc(p);
     }
     text[length-1]='\0';
-    puts(text);
     /** check for configration tag**/
     index1=get_start("<Configurations>",length,text);
     index2=get_end("</Configurations>",length,text);
@@ -58,7 +57,6 @@ void read_xml(int parameters[])
         char config[length+1];             /**sub string for text between configration tag**/
         substring(text,config,index1,index2);
         config[length]='\0';
-        printf("%s\n",config);
         char list[][14]={"<Height>","</Height>","<Width>","</Width>","<Highscores>","</Highscores>"};
 
         for(int i=0;i<6;i+=2)
