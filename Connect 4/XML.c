@@ -42,7 +42,6 @@ void read_xml(int parameters[])
     }
     text[length-1]='\0';
     puts(text);
-    length=remove_spaces(length,text);
     /** check for configration tag**/
     index1=get_start("<Configurations>",length,text);
     index2=get_end("</Configurations>",length,text);
@@ -152,15 +151,16 @@ int get_end(char str[],int length,char config[])
 /**function return the numder between two index**/
 int number(int index1,int index2,char config[])
 {
-    int r;
+    int r=0;
     int count =0;
     int size=index2-index1;
     char num[size];
     for(int k=index1; k<index2; k++)
     {
-        if( isdigit(config[k]) )
+        if( isdigit(config[k]) || isspace(config[k]) )
            num[count++]=config[k];
     }
+     remove_spaces(size,num);
     r=atoi(num);
     return r;
 }
