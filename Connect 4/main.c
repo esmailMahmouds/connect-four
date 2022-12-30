@@ -33,7 +33,7 @@ typedef struct{
 playerData player1,player2;
 char Empty[13];
 long long timr;
-int Animation=0;
+int Animation=1;
 
 void blue(){printf("\033[0;34m");}
 void red(){printf("\033[1;31m");}
@@ -93,7 +93,7 @@ void MainMenu(char a[][prmtrs.c]){
         char b[prmtrs.r][prmtrs.c];
         for(int i=0;i<prmtrs.r;i++)
             for(int j=0;j<prmtrs.c;j++)
-                b[i][j]=a[i][j];
+                b[i][j]=a[i][j];/*Making A second Array to accept loads of different dimensions*/
         countMovs(b);
         player1.score=countFours(player1.chip,b);
         player2.score=countFours(player2.chip,b);
@@ -128,7 +128,7 @@ void start(char a[][prmtrs.c]){
     initiate(a);
     countMovs(a);
     player1.score=0;
-    player2.score=0;
+    player2.score=0;/*Initializing each time the User Starts a NewGame*/
     printf("Select GameMode:\nH:Player Vs Player\nC:Player Vs Computer\n");
     key=getch();
     switch(key){
@@ -145,31 +145,35 @@ void start(char a[][prmtrs.c]){
             start(a);}
 }
 void initiate(char a[][prmtrs.c]){
+    //initializing all elements of the array to ' '
     for(int i=0;i<prmtrs.r;i++)
         for(int j=0;j<prmtrs.c;j++)
             a[i][j]=' ';
 }
 void gameComputer(char a[][prmtrs.c]){
     timr=time(NULL);
-    int RU[prmtrs.c*prmtrs.r];
+    int RU[prmtrs.c*prmtrs.r];/*Arrray to save each move taken to operate undo and redo with*/
     for(int i=0;i<prmtrs.c*prmtrs.r;i++)
-        RU[i]=-1;
-    int e;
+        RU[i]=-1;/*intializing all chosen columns to -1 to control where we undo and redo to*/
+    int e;/*Selected column*/
     gameMode='c';
     board(a);
-    while(full(a)==0){
+    while(full(a)==0)/*Operating as long as a isn't full*/
+        {
         printf("\033[0m(~):Menu\n\033[1;31mYour Score:%d\t\033[0;33mComputer Score:%d\n\033[1;31mYour Moves:%d\t\033[0;33mComputer Moves:%d\n",player1.score,player2.score,player1.turns,player2.turns);
-        if(player1.turns<=player2.turns){
+        if(player1.turns<=player2.turns)/*as player1 starts he plays if his turns is equal to that of player 2*/
+        {
             printf("\033[1;31mTime~%02d:%02d\n",(int)(time(NULL)-timr)/60,(int)(time(NULL)-timr)%60);
             printf("\033[1;31mChoose A Bin:");
             e=choose(a);
-            if(e==-13){
+            if(e==-13)//An assumption Chosen number to open the inGame menu
+            {
                     Menu(a,RU);
                     board(a);
             }
             else{
-                RU[player1.turns+player2.turns]=e;
-                for(int i=player1.turns+player2.turns+1;i<prmtrs.r*prmtrs.c;i++)
+                RU[player1.turns+player2.turns]=e;//Assigning the chosen column in the array by using the turns as an index
+                for(int i=player1.turns+player2.turns+1;i<prmtrs.r*prmtrs.c;i++)//if a player plays all remaining Redos are semi disable
                     RU[i]=-1;
                 fill(player1.chip,a,e);
                 player1.score=countFours(player1.chip,a);
@@ -273,6 +277,7 @@ void Menu(char a[][prmtrs.c],int RU[]){
             break;
         case'A':
         case'a':
+            //An InGame Menu Option to disable the Falling chips Animation
             printf("(0)AnimationOFF\n(1)AnimationON\n");
             scanf("%d",&Animation);
             while(Animation!=0&&Animation!=1){
@@ -293,11 +298,13 @@ void Menu(char a[][prmtrs.c],int RU[]){
 int choose(char a[][prmtrs.c]){
     int i;
     char numberCols[9];
+    //For Using Letters as Column Indexing but it fulfills the requirements for 58 column Max
     if(prmtrs.c<=58){
         i=getch()-65;
         if(i==61)
             i=-13;
     }
+    //For Using Numbers as Column Indexing from 58 and More
     else{
         scanf(" %s",&numberCols);
         i=atoi(numberCols)-1;
@@ -322,7 +329,7 @@ void fill(char chip ,char a[][prmtrs.c],int q){
             else{
                 a[0][q]=chip;
                 for(i=1;i<prmtrs.r;i++){
-                    if(a[i][q]==' '){
+                    if(a[i][q]==' '){//Alternate printing and deleting till the bottom of the bottom while flashing the board Inbetween
                         board(a);
                         a[i-1][q]=' ';
                         Beep(200,75);
@@ -334,7 +341,7 @@ void fill(char chip ,char a[][prmtrs.c],int q){
         Beep(300,40);
         Beep(400,50);
         }
-        else{
+        else{//if Falling Animation is turned Off chips are put in a single frame
             for(i=prmtrs.r-1;i>=0;i--){
                 if(a[i][q]==' '){
                     a[i][q]=chip;
@@ -345,6 +352,7 @@ void fill(char chip ,char a[][prmtrs.c],int q){
     }
 }
 void Rmve(char chip,char a[][prmtrs.c],int e){
+    //same Concept of Filling but in Reverse
     if(e>=0){
         if(Animation==1){
             for(int i=0;i<prmtrs.r;i++){
@@ -412,13 +420,13 @@ void columnIndex(){
 void bar(){
         printf(" ");
         for(int i=0;i<prmtrs.c;i++)
-            printf("%c%c%c%c",206,205,205,205);
-        printf("%c",206);
+            printf("%c%c%c%c",206,205,205,205);//printing ╬═══ in a loop
+        printf("%c",206);//finishing each bar in the grid with a ╬
         printf("\n");
 }
 int countFours(char chip,char a[][prmtrs.c]){
     int count=0,f,i,j,k;
-    for(i=0;i<prmtrs.r;i++){
+    for(i=0;i<prmtrs.r;i++){//Counting in rows
         for(j=0;j<(prmtrs.c-3);j++){
             f=0;
             for(k=j;k<(j+4);k++)
@@ -427,7 +435,7 @@ int countFours(char chip,char a[][prmtrs.c]){
             if(f==4)count++;
         }
     }
-    for(j=0;j<prmtrs.c;j++){
+    for(j=0;j<prmtrs.c;j++){//Counting in Columns
         for(i=0;i<(prmtrs.r-3);i++){
             f=0;
             for(k=i;k<(i+4);k++)
@@ -436,7 +444,7 @@ int countFours(char chip,char a[][prmtrs.c]){
             if(f==4)count++;
         }
     }
-    for(i=0;i<prmtrs.r-3;i++){
+    for(i=0;i<prmtrs.r-3;i++){//Counting in 120 degree diagonals
         for(j=0;j<prmtrs.c-3;j++){
             f=0;
             for(k=0;k<4;k++)
@@ -445,7 +453,7 @@ int countFours(char chip,char a[][prmtrs.c]){
             if(f==4)count++;
         }
     }
-    for(i=0;i<prmtrs.r-3;i++){
+    for(i=0;i<prmtrs.r-3;i++){//Counting in 60 degree diagonals
         for(j=3;j<prmtrs.c;j++){
             f=0;
             for(k=0;k<4;k++)
@@ -464,10 +472,12 @@ void countMovs(char a[][prmtrs.c]){
                 else if(a[i][j]=='O')c2++;
         }
     }
+    //counting each chip and assigning them to players' turns
     player1.turns=c1;
     player2.turns=c2;
 }
 int full(char a[][prmtrs.c]){
+    //checking if the grid is full and returning 1 or not and returning 0
     for(int i=0;i<prmtrs.r;i++)
         for(int j=0;j<prmtrs.c;j++)
             if(a[i][j]==' ')
@@ -540,9 +550,6 @@ int AI(char a[][prmtrs.c],char one,char two){
             }
         }
     }
-//    for(int i=0;i<prmtrs.c;i++)
-//        printf("(%d %d),",choices[i].sampleColumn,choices[i].choiceScore);
-//    getch();
     Animation=animationState;
     while(a[0][choices[Chosen].sampleColumn]!=' ')
         Chosen++;
@@ -554,6 +561,7 @@ void save(char a[][prmtrs.c],int RU[]){
     FILE *s=NULL;
     printf("choose slot:\n(a)slot1\n(b)slot2\n(c)slot3\n(d)Back\n");
     key=getch();
+    //Choosing A save Slot to save in by the user
     switch(key){
         case 'A':
         case 'a':
@@ -575,14 +583,15 @@ void save(char a[][prmtrs.c],int RU[]){
         }
     if(s==NULL)
         printf("something went wrong");
-    fwrite(&prmtrs,sizeof(rcx),1,s);
+    fwrite(&prmtrs,sizeof(rcx),1,s);//Writing the dimensions of the saved Game
     for(int i=0; i<prmtrs.r; i++)
         for(int j=0; j<prmtrs.c; j++)
-            fwrite(&a[i][j],sizeof(char),1,s);
-    fwrite(&gameMode,sizeof(int),1,s);
+            fwrite(&a[i][j],sizeof(char),1,s);//Writing the Game Board
+    fwrite(&gameMode,sizeof(int),1,s);//Labeling the GameMode
     fclose(s);
 }
 void load(char a[][prmtrs.c]){
+    //Same as Save but Reversed
     system("cls");
     int key;
     FILE *s=NULL;
@@ -658,7 +667,7 @@ void Redo(char a[][prmtrs.c],int RU[]){
     }
 }
 void HighScoreSave(int winner){
-    HighScr p[prmtrs.x],winnerData;
+    HighScr p[prmtrs.x],winnerData;//initializing a struct elements for holding the players data
     for(int i=0;i<prmtrs.x;i++){
         strcpy(p[i].name,Empty);
         p[i].score=0;
@@ -676,35 +685,27 @@ void HighScoreSave(int winner){
         strcpy(winnerData.name,player2.name);
         }
     FILE *s=NULL;
-    s=fopen("HighScores.dat","rb");
-    if(s!=NULL){
+    s=fopen("HighScores.dat","rb");//Opening the file for reading 1st to operate on the already saved
+    if(s!=NULL){//if the file was found we read
         fread(p,sizeof(HighScr),prmtrs.x,s);
-    }
-    else{
-        strcpy(p[0].name,winnerData.name);
-        p[0].score=winnerData.score;
-    }
-    fclose(s);
-    FILE *f=NULL;
-    f=fopen("HighScores.dat","wb");
-    for(int i=0;i<prmtrs.x;i++){
+        for(int i=0;i<prmtrs.x;i++){//looking for the winner's name in our structs
         if(strcasecmp(p[i].name,winnerData.name)==0){
             Found=1;
-            if(p[i].score<winnerData.score){
+            if(p[i].score<winnerData.score){//Comparing old and new scores
                 p[i].score=winnerData.score;
             }
             break;
         }
     }
     if(Found==0){
-            if(winnerData.score>p[prmtrs.x-1].score){
+            if(winnerData.score>p[prmtrs.x-1].score){//if it wasn't found we put it in place of the last if it had a bigger score than him
                 p[prmtrs.x-1].score=winnerData.score;
                 strcpy(p[prmtrs.x-1].name,winnerData.name);
             }
     }
     char tempName[13];
     int tempScore;
-    for(int i=0;i<prmtrs.x;i++){
+    for(int i=0;i<prmtrs.x;i++){//we sort our array of structs
             for(int j=i+1;j<prmtrs.x;j++){
                     if(p[i].score<p[j].score){
                         tempScore=p[i].score;
@@ -715,13 +716,20 @@ void HighScoreSave(int winner){
                         strcpy(p[j].name,tempName);
                     }
             }
+        }
     }
+    else{//if not we put our winner data directly the 1st place in the struct
+        strcpy(p[0].name,winnerData.name);
+        p[0].score=winnerData.score;
+    }
+    fclose(s);//close that was opened for reading
+    FILE *f=NULL;
+    f=fopen("HighScores.dat","wb");
     fwrite(p,sizeof(HighScr),prmtrs.x,f);
     fclose(f);
     for(int i=0;i<prmtrs.x;i++){
         printf("%02d  . %05d|%s\n",i+1,p[i].score,p[i].name);
     }
-    sleep(1);
 }
 void HighScoreLoad(){
     HighScr p[prmtrs.x],winnerData;
@@ -780,4 +788,3 @@ void End(){
         exit(0);
     main();
 }
-
