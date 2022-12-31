@@ -33,7 +33,7 @@ typedef struct{
 playerData player1,player2;
 char Empty[13];
 long long timr;
-int Animation=0;
+int Animation=1;
 int firstTime=0;
 
 void blue(){printf("\033[0;34m");}
@@ -70,8 +70,8 @@ int main(){
     int parameters[3];
     if(firstTime==0){
         read_xml(parameters);
-        prmtrsHold.r=prmtrs.r=parameters[0];
-        prmtrsHold.c=prmtrs.c=parameters[1];
+        prmtrsHold.r=prmtrs.r=30;
+        prmtrsHold.c=prmtrs.c=50;
         prmtrsHold.x=prmtrs.x=parameters[2];
         firstTime++;
     }
@@ -499,22 +499,26 @@ int AI(char a[][prmtrs.c],char one,char two){
                 for(int j=0;j<prmtrs.c;j++){
                         if(Test[0][j]==' '){
                             fill(one,Test,j);
-                            for(int k=0;k<prmtrs.c;k++){
-                                if(Test[0][k]==' '){
-                                    fill(two,Test,k);
-                                    difference1[k]=countFours(two,Test)-countFours(one,Test);
-                                    Rmve(two,Test,k);
+                            if(prmtrs.c<20){
+                                for(int k=0;k<prmtrs.c;k++){
+                                    if(Test[0][k]==' '){
+                                        fill(two,Test,k);
+                                        difference1[k]=countFours(two,Test)-countFours(one,Test);
+                                        Rmve(two,Test,k);
+                                    }
                                 }
-                            }
-                            for(int ii=0;ii<prmtrs.c;ii++){
-                                for(int jj=ii+1;jj<prmtrs.c;jj++){
-                                    if(difference1[ii]<difference1[jj]){
-                                        tempdiff=difference1[ii];
-                                        difference1[ii]=difference1[jj];
-                                        difference1[jj]=tempdiff;
+                                for(int ii=0;ii<prmtrs.c;ii++){
+                                    for(int jj=ii+1;jj<prmtrs.c;jj++){
+                                        if(difference1[ii]<difference1[jj]){
+                                            tempdiff=difference1[ii];
+                                            difference1[ii]=difference1[jj];
+                                            difference1[jj]=tempdiff;
+                                        }
                                     }
                                 }
                             }
+                            else
+                                difference1[0]=0;
                             difference[j]=countFours(two,Test)-countFours(one,Test);
                             Rmve(one,Test,j);
                         }
