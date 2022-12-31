@@ -70,8 +70,8 @@ int main(){
     int parameters[3];
     if(firstTime==0){
         read_xml(parameters);
-        prmtrsHold.r=prmtrs.r=30;
-        prmtrsHold.c=prmtrs.c=50;
+        prmtrsHold.r=prmtrs.r=parameters[0];
+        prmtrsHold.c=prmtrs.c=parameters[1];
         prmtrsHold.x=prmtrs.x=parameters[2];
         firstTime++;
     }
